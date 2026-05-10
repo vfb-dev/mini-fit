@@ -49,7 +49,9 @@ export default function Home() {
           </div>
 
           {/* Table */}
-          <HistoryTable />
+          <div className="col-span-12 rounded-2xl bg-white p-6 shadow-sm">
+            <HistoryTable />
+          </div>
         </div>
       </div>
     </>

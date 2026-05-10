@@ -33,7 +33,7 @@ export function HistoryTable() {
   const { handleModal } = useModalStore();
 
   return (
-    <div className="col-span-12 rounded-2xl bg-white p-6 shadow-sm">
+    <>
       <div className="flex justify-between mb-2">
         <h3 className="text-lg font-semibold">History</h3>
         <Button className="cursor-pointer" onClick={() => handleModal(true)}>
@@ -60,6 +60,6 @@ export function HistoryTable() {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </>
   );
 }
