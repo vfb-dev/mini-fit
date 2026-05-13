@@ -1,10 +1,12 @@
-import { ExerciseModal } from "@/components/ExerciseModal";
+import { CreateExerciseModal } from "@/components/CreateExerciseModal";
+import { EditExerciseModal } from "@/components/EditExerciseModal";
 import { HistoryTable } from "@/components/HistoryTable";
 
 export default function Home() {
   return (
     <>
-      <ExerciseModal />
+      <CreateExerciseModal />
+      <EditExerciseModal />
 
       <div className="w-full max-w-7xl p-6">
         <div className="grid grid-cols-12 gap-6">

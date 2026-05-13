@@ -1,5 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
+import { MoreHorizontal } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import {
   Table,
   TableBody,
@@ -10,33 +21,33 @@ import {
 } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
+
 import { useModalStore } from "@/store/modalStore";
+import { useExerciseStore } from "@/store/exerciseStore";
 
-type dummyData = {
-  date: string;
-  exercise: string;
-  reps: number;
-  Weigth: number;
-};
-
-const dummyDataList: dummyData[] = [
-  { date: "07/05/2026", exercise: "Dips", reps: 3, Weigth: 80 },
-  { date: "07/05/2026", exercise: "Pull up", reps: 3, Weigth: 80 },
-  { date: "07/05/2026", exercise: "Squats", reps: 3, Weigth: 80 },
-  { date: "07/05/2026", exercise: "Push ups", reps: 3, Weigth: 80 },
-  { date: "07/05/2026", exercise: "Dips2", reps: 3, Weigth: 80 },
-  { date: "07/05/2026", exercise: "Pull up2", reps: 3, Weigth: 80 },
-  { date: "07/05/2026", exercise: "Squats2", reps: 3, Weigth: 80 },
-];
+import { getExercises, deleteExercise } from "@/api/exercises";
 
 export function HistoryTable() {
-  const { handleModal } = useModalStore();
+  const { handleCreateModal, handleEditModal } = useModalStore();
+  const { exercises, setExercises, setSelectedExercise } = useExerciseStore();
+
+  useEffect(() => {
+    async function loadExercises(): Promise<void> {
+      const data = await getExercises();
+      setExercises(data);
+    }
+
+    loadExercises();
+  }, [setExercises]);
 
   return (
     <>
       <div className="flex justify-between mb-2">
         <h3 className="text-lg font-semibold">History</h3>
-        <Button className="cursor-pointer" onClick={() => handleModal(true)}>
+        <Button
+          className="cursor-pointer"
+          onClick={() => handleCreateModal(true)}
+        >
           Add Exercise
         </Button>
       </div>
@@ -45,17 +56,64 @@ export function HistoryTable() {
           <TableRow>
             <TableHead className="font-bold">Date</TableHead>
             <TableHead className="font-bold">Exercise</TableHead>
-            <TableHead className="font-bold">reps</TableHead>
-            <TableHead className="font-bold text-right">Weigth</TableHead>
+            <TableHead className="font-bold">Reps</TableHead>
+            <TableHead className="font-bold">Weigth</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {dummyDataList.map((d) => (
-            <TableRow key={d.exercise}>
-              <TableCell>{d.date}</TableCell>
-              <TableCell>{d.exercise}</TableCell>
-              <TableCell>{d.reps}</TableCell>
-              <TableCell className="text-right">{d.Weigth}</TableCell>
+          {exercises.map((exercise) => (
+            <TableRow key={exercise.id}>
+              <TableCell>
+                {new Date(exercise.date).toLocaleString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </TableCell>
+              <TableCell>{exercise.name}</TableCell>
+              <TableCell>{exercise.reps}</TableCell>
+              <TableCell>{exercise.weight}</TableCell>
+              <TableCell className="text-right ">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 cursor-pointer"
+                    >
+                      <MoreHorizontal />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setSelectedExercise(exercise);
+                        handleEditModal(true);
+                      }}
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      variant="destructive"
+                      onClick={async () => {
+                        await deleteExercise(exercise.id);
+
+                        const data = await getExercises();
+                        setExercises(data);
+                      }}
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
