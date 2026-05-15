@@ -1,15 +1,13 @@
 const API_URL = "http://127.0.0.1:8000/api/v1/exercises/";
 
-export async function getExercises() {
-  const response = await fetch(API_URL);
+export async function getExercises(page = 1) {
+  const response = await fetch(`${API_URL}?page=${page}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch");
   }
 
-  const data = await response.json();
-
-  return data;
+  return response.json();
 }
 
 export async function createExercise(exerciseData: {

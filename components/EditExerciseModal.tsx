@@ -59,7 +59,8 @@ export function EditExerciseModal() {
 
   async function onSubmit(formData: FormData) {
     await updateExercise(selectedExercise!.id, formData);
-    setExercises(await getExercises());
+    const data = await getExercises();
+    setExercises(data.results);
 
     reset();
     handleEditModal(false);

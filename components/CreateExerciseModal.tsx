@@ -6,13 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useModalStore } from "@/store/modalStore";
-import { useExerciseStore } from "@/store/exerciseStore";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { createExercise, getExercises } from "@/api/exercises";
+import { createExercise } from "@/api/exercises";
 
 const schema = z.object({
   name: z.string().min(1, "Required"),
@@ -22,9 +21,16 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export function CreateExerciseModal() {
+type CreateModalProps = {
+  currentPage: number;
+  loadExercises: (page: number) => void;
+};
+
+export function CreateExerciseModal({
+  currentPage,
+  loadExercises,
+}: CreateModalProps) {
   const { createModal, handleCreateModal } = useModalStore();
-  const { setExercises } = useExerciseStore();
 
   const {
     register,
@@ -35,9 +41,10 @@ export function CreateExerciseModal() {
     resolver: zodResolver(schema),
   });
 
-  async function onSubmit(data: FormData) {
-    await createExercise(data);
-    setExercises(await getExercises());
+  async function onSubmit(formData: FormData) {
+    await createExercise(formData);
+
+    loadExercises(currentPage);
 
     reset();
     handleCreateModal(false);
