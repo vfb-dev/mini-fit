@@ -36,7 +36,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { useModalStore } from "@/store/modalStore";
-import { useExerciseStore } from "@/store/exerciseStore";
+//import { useExerciseStore } from "@/store/exerciseStore";
 
 import { getExercises, deleteExercise } from "@/api/exercises";
 
@@ -46,12 +46,25 @@ type PaginationInfo = {
   previous: string | null;
 };
 
+type Exercise = {
+  id: number;
+  date: string;
+  name: string;
+  reps: number;
+  weight: number;
+};
+
 const PAGE_SIZE = 5;
 
 export function HistoryTable() {
   const { handleCreateModal, handleEditModal } = useModalStore();
 
-  const { exercises, setExercises, setSelectedExercise } = useExerciseStore();
+  //const { exercises, setExercises, setSelectedExercise } = useExerciseStore();
+
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null,
+  );
 
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfo>({
@@ -107,7 +120,11 @@ export function HistoryTable() {
         currentPage={currentPage}
         loadExercises={loadExercises}
       />
-      <EditExerciseModal />
+      <EditExerciseModal
+        selectedExercise={selectedExercise}
+        currentPage={currentPage}
+        loadExercises={loadExercises}
+      />
 
       <div className="flex justify-between mb-4">
         <h3 className="text-lg font-semibold">History</h3>

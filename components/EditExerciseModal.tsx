@@ -8,13 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useModalStore } from "@/store/modalStore";
-import { useExerciseStore } from "@/store/exerciseStore";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { getExercises, updateExercise } from "@/api/exercises";
+import { updateExercise } from "@/api/exercises";
 
 const schema = z.object({
   name: z.string().min(1, "Required"),
@@ -25,9 +24,26 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export function EditExerciseModal() {
+type Exercise = {
+  id: number;
+  date: string;
+  name: string;
+  reps: number;
+  weight: number;
+};
+
+type EditModalProps = {
+  selectedExercise: Exercise | null;
+  currentPage: number;
+  loadExercises: (page: number) => Promise<void>;
+};
+
+export function EditExerciseModal({
+  selectedExercise,
+  currentPage,
+  loadExercises,
+}: EditModalProps) {
   const { editModal, handleEditModal } = useModalStore();
-  const { setExercises, selectedExercise } = useExerciseStore();
 
   const {
     register,
@@ -37,10 +53,10 @@ export function EditExerciseModal() {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      date: "",
       name: "",
       reps: 0,
       weight: 0,
-      date: "",
     },
   });
 
@@ -59,8 +75,7 @@ export function EditExerciseModal() {
 
   async function onSubmit(formData: FormData) {
     await updateExercise(selectedExercise!.id, formData);
-    const data = await getExercises();
-    setExercises(data.results);
+    await loadExercises(currentPage);
 
     reset();
     handleEditModal(false);

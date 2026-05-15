@@ -23,7 +23,7 @@ type FormData = z.infer<typeof schema>;
 
 type CreateModalProps = {
   currentPage: number;
-  loadExercises: (page: number) => void;
+  loadExercises: (page: number) => Promise<void>;
 };
 
 export function CreateExerciseModal({
@@ -44,7 +44,7 @@ export function CreateExerciseModal({
   async function onSubmit(formData: FormData) {
     await createExercise(formData);
 
-    loadExercises(currentPage);
+    await loadExercises(currentPage);
 
     reset();
     handleCreateModal(false);
