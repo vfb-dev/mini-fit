@@ -36,7 +36,6 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { useModalStore } from "@/store/modalStore";
-//import { useExerciseStore } from "@/store/exerciseStore";
 
 import { getExercises, deleteExercise } from "@/api/exercises";
 
@@ -58,8 +57,6 @@ const PAGE_SIZE = 5;
 
 export function HistoryTable() {
   const { handleCreateModal, handleEditModal } = useModalStore();
-
-  //const { exercises, setExercises, setSelectedExercise } = useExerciseStore();
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(

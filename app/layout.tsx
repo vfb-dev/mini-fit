@@ -25,9 +25,7 @@ export default function RootLayout({
 
           {/* Content */}
           <main className="flex-1">
-            <div className="flex min-h-screen items-center justify-center">
-              {children}
-            </div>
+            <div className="flex min-h-screen justify-center">{children}</div>
           </main>
         </div>
       </body>

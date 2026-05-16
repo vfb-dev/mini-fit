@@ -16,10 +16,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { updateExercise } from "@/api/exercises";
 
 const schema = z.object({
+  date: z.string(),
   name: z.string().min(1, "Required"),
   reps: z.number().min(1, "Minimum 1 rep"),
-  weight: z.number().min(0, "Must be positive"),
-  date: z.string(),
+  weight: z
+    .number()
+    .min(0, "Must be positive")
+    .max(9999, "Maximum weight is 9999"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -166,6 +169,8 @@ export function EditExerciseModal({
                     id="weight"
                     type="number"
                     placeholder="20"
+                    step="0.01"
+                    max={9999}
                     {...register("weight", {
                       valueAsNumber: true,
                     })}

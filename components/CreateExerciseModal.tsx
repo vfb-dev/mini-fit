@@ -16,7 +16,10 @@ import { createExercise } from "@/api/exercises";
 const schema = z.object({
   name: z.string().min(1, "Required"),
   reps: z.number().min(1, "Minimum 1 rep"),
-  weight: z.number().min(0, "Must be positive"),
+  weight: z
+    .number()
+    .min(0, "Must be positive")
+    .max(9999, "Maximum weight is 9999"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -117,7 +120,9 @@ export function CreateExerciseModal({
                   <Input
                     id="weight"
                     type="number"
-                    placeholder="20"
+                    placeholder="20.5"
+                    step="0.01"
+                    max={9999}
                     {...register("weight", {
                       valueAsNumber: true,
                     })}
