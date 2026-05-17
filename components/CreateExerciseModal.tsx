@@ -12,7 +12,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { createExercise } from "@/api/exercises";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const schema = z.object({

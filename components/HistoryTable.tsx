@@ -39,12 +39,6 @@ import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/modalStore";
 import { getExercises, deleteExercise } from "@/api/exercises";
 
-type PaginationInfo = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-};
-
 type Exercise = {
   id: number;
   date: string;
@@ -103,6 +97,12 @@ export function HistoryTable() {
     },
   });
 
+  function toTitleCase(text: string) {
+    return text.replace(/\w\S*/g, (word) => {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+  }
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -151,7 +151,7 @@ export function HistoryTable() {
                 })}
               </TableCell>
 
-              <TableCell>{exercise.name}</TableCell>
+              <TableCell>{toTitleCase(exercise.name)}</TableCell>
 
               <TableCell>{exercise.reps}</TableCell>
 
