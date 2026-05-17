@@ -15,6 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { updateExercise } from "@/api/exercises";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 const schema = z.object({
   date: z.string(),
   name: z.string().min(1, "Required"),
@@ -37,16 +39,16 @@ type Exercise = {
 
 type EditModalProps = {
   selectedExercise: Exercise | null;
-  currentPage: number;
-  loadExercises: (page: number) => Promise<void>;
 };
 
-export function EditExerciseModal({
-  selectedExercise,
-  currentPage,
-  loadExercises,
-}: EditModalProps) {
+type UpdateExerciseData = {
+  id: number;
+  exerciseData: FormData;
+};
+
+export function EditExerciseModal({ selectedExercise }: EditModalProps) {
   const { editModal, handleEditModal } = useModalStore();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -76,12 +78,27 @@ export function EditExerciseModal({
     }
   }, [selectedExercise, reset]);
 
-  async function onSubmit(formData: FormData) {
-    await updateExercise(selectedExercise!.id, formData);
-    await loadExercises(currentPage);
+  const updateMutation = useMutation({
+    mutationFn: ({ id, exerciseData }: UpdateExerciseData) =>
+      updateExercise(id, exerciseData),
 
-    reset();
-    handleEditModal(false);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["exercises"],
+      });
+
+      reset();
+      handleEditModal(false);
+    },
+  });
+
+  async function onSubmit(formData: FormData) {
+    if (!selectedExercise) return;
+
+    updateMutation.mutate({
+      id: selectedExercise.id,
+      exerciseData: formData,
+    });
   }
 
   if (!editModal) return null;

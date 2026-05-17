@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+import { Providers } from "./providers";
+
 const inter = Inter({
   subsets: ["latin"],
 });
@@ -25,7 +27,9 @@ export default function RootLayout({
 
           {/* Content */}
           <main className="flex-1">
-            <div className="flex min-h-screen justify-center">{children}</div>
+            <div className="flex min-h-screen justify-center">
+              <Providers>{children}</Providers>
+            </div>
           </main>
         </div>
       </body>

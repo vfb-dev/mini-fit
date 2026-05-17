@@ -13,6 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { createExercise } from "@/api/exercises";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 const schema = z.object({
   name: z.string().min(1, "Required"),
   reps: z.number().min(1, "Minimum 1 rep"),
@@ -24,16 +26,9 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-type CreateModalProps = {
-  currentPage: number;
-  loadExercises: (page: number) => Promise<void>;
-};
-
-export function CreateExerciseModal({
-  currentPage,
-  loadExercises,
-}: CreateModalProps) {
+export function CreateExerciseModal() {
   const { createModal, handleCreateModal } = useModalStore();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -44,13 +39,21 @@ export function CreateExerciseModal({
     resolver: zodResolver(schema),
   });
 
-  async function onSubmit(formData: FormData) {
-    await createExercise(formData);
+  const createMutation = useMutation({
+    mutationFn: createExercise,
 
-    await loadExercises(currentPage);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["exercises"],
+      });
 
-    reset();
-    handleCreateModal(false);
+      reset();
+      handleCreateModal(false);
+    },
+  });
+
+  function onSubmit(formData: FormData) {
+    createMutation.mutate(formData);
   }
 
   if (!createModal) return null;

@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { CreateExerciseModal } from "@/components/CreateExerciseModal";
 import { EditExerciseModal } from "@/components/EditExerciseModal";
@@ -34,9 +36,7 @@ import {
 } from "@/components/ui/pagination";
 
 import { Button } from "@/components/ui/button";
-
 import { useModalStore } from "@/store/modalStore";
-
 import { getExercises, deleteExercise } from "@/api/exercises";
 
 type PaginationInfo = {
@@ -53,75 +53,64 @@ type Exercise = {
   weight: number;
 };
 
+type ExercisesResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Exercise[];
+};
+
 const PAGE_SIZE = 5;
 
 export function HistoryTable() {
+  const queryClient = useQueryClient();
   const { handleCreateModal, handleEditModal } = useModalStore();
 
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
     null,
   );
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [paginationInfo, setPaginationInfo] = useState<PaginationInfo>({
-    count: 0,
-    next: null,
-    previous: null,
+  const { data, isLoading } = useQuery<ExercisesResponse>({
+    queryKey: ["exercises", currentPage],
+    queryFn: () => getExercises(currentPage),
+    placeholderData: (previousData) => previousData,
   });
+
+  const exercises = data?.results ?? [];
+
+  const paginationInfo = {
+    count: data?.count ?? 0,
+    next: data?.next ?? null,
+    previous: data?.previous ?? null,
+  };
 
   const totalPages = Math.ceil(paginationInfo.count / PAGE_SIZE);
 
-  async function loadExercises(page: number) {
-    const { count, next, previous, results } = await getExercises(page);
+  const deleteMutation = useMutation({
+    mutationFn: deleteExercise,
 
-    setPaginationInfo({ count, next, previous });
-    setExercises(results);
-  }
+    onSuccess: async () => {
+      const isLastItemOnPage = exercises.length === 1;
 
-  async function handleDelete(id: number) {
-    await deleteExercise(id);
+      if (isLastItemOnPage && currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
+      }
 
-    // if deleting the last item of the page
-    // go back one page automatically
-    const isLastItemOnPage = exercises.length === 1;
-
-    const newPage =
-      isLastItemOnPage && currentPage > 1 ? currentPage - 1 : currentPage;
-
-    setCurrentPage(newPage);
-
-    await loadExercises(newPage);
-  }
-
-  useEffect(() => {
-    async function loadExercises() {
-      const { count, next, previous, results } =
-        await getExercises(currentPage);
-
-      setPaginationInfo({
-        count,
-        next,
-        previous,
+      await queryClient.invalidateQueries({
+        queryKey: ["exercises"],
       });
+    },
+  });
 
-      setExercises(results);
-    }
-
-    loadExercises();
-  }, [currentPage, setExercises]);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
-      <CreateExerciseModal
-        currentPage={currentPage}
-        loadExercises={loadExercises}
-      />
-      <EditExerciseModal
-        selectedExercise={selectedExercise}
-        currentPage={currentPage}
-        loadExercises={loadExercises}
-      />
+      <CreateExerciseModal />
+      <EditExerciseModal selectedExercise={selectedExercise} />
 
       <div className="flex justify-between mb-4">
         <h3 className="text-lg font-semibold">History</h3>
@@ -196,7 +185,7 @@ export function HistoryTable() {
                     <DropdownMenuItem
                       className="cursor-pointer"
                       variant="destructive"
-                      onClick={() => handleDelete(exercise.id)}
+                      onClick={() => deleteMutation.mutate(exercise.id)}
                     >
                       Delete
                     </DropdownMenuItem>
