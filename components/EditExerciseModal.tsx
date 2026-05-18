@@ -18,7 +18,7 @@ import { updateExercise } from "@/api/exercises";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const schema = z.object({
-  date: z.string(),
+  date: z.string().min(1, "Required"),
   name: z.string().min(1, "Required"),
   reps: z.number().min(1, "Minimum 1 rep"),
   weight: z
@@ -45,6 +45,19 @@ type UpdateExerciseData = {
   id: number;
   exerciseData: FormData;
 };
+
+function formatDateForInput(dateString: string) {
+  const date = new Date(dateString);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
 
 export function EditExerciseModal({ selectedExercise }: EditModalProps) {
   const { editModal, handleEditModal } = useModalStore();
@@ -73,7 +86,7 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
         weight: Number(selectedExercise.weight),
 
         // format for datetime-local input
-        date: new Date(selectedExercise.date).toISOString().slice(0, 16),
+        date: formatDateForInput(selectedExercise.date),
       });
     }
   }, [selectedExercise, reset]);
