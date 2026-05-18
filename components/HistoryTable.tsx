@@ -39,6 +39,8 @@ import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/modalStore";
 import { getExercises, deleteExercise } from "@/api/exercises";
 
+import { format } from "date-fns";
+
 type Exercise = {
   id: number;
   date: string;
@@ -55,6 +57,16 @@ type ExercisesResponse = {
 };
 
 const PAGE_SIZE = 5;
+
+function toTitleCase(text: string) {
+  return text.replace(/\w\S*/g, (word) => {
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+}
+
+function formatExerciseDate(dateString: string) {
+  return format(new Date(dateString), "dd/MM/yyyy HH:mm");
+}
 
 export function HistoryTable() {
   const queryClient = useQueryClient();
@@ -97,12 +109,6 @@ export function HistoryTable() {
     },
   });
 
-  function toTitleCase(text: string) {
-    return text.replace(/\w\S*/g, (word) => {
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    });
-  }
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -141,15 +147,7 @@ export function HistoryTable() {
         <TableBody>
           {exercises.map((exercise) => (
             <TableRow key={exercise.id}>
-              <TableCell>
-                {new Date(exercise.date).toLocaleString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </TableCell>
+              <TableCell>{formatExerciseDate(exercise.date)}</TableCell>
 
               <TableCell>{toTitleCase(exercise.name)}</TableCell>
 
