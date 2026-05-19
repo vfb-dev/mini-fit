@@ -1,5 +1,7 @@
 "use client";
 
+import { SlidersHorizontal } from "lucide-react";
+
 import { ResponsiveBar } from "@nivo/bar";
 
 import {
@@ -10,6 +12,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
 
 const data = [
   { month: "January", value: 12500 },
@@ -34,47 +49,98 @@ const colors = [
 export function ProgressChart() {
   return (
     <>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex justify-between mb-4">
         <h3 className="text-lg font-semibold">Progress</h3>
 
-        <div className="flex justify-end gap-2">
-          <Select defaultValue="30">
-            <SelectTrigger className="w-full max-w-40 cursor-pointer">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="7">7 days</SelectItem>
-                <SelectItem value="30">30 days</SelectItem>
-                <SelectItem value="90">90 days</SelectItem>
-                <SelectItem value="max">Max</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-4">
+          <ToggleGroup type="single" defaultValue="30D">
+            <ToggleGroupItem
+              className="cursor-pointer"
+              value="7D"
+              aria-label="Toggle 7D"
+            >
+              7D
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className="cursor-pointer"
+              value="30D"
+              aria-label="Toggle 30D"
+            >
+              30D
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className="cursor-pointer"
+              value="90D"
+              aria-label="Toggle 90D"
+            >
+              90D
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className="cursor-pointer"
+              value="1Y"
+              aria-label="Toggle 90D"
+            >
+              1Y
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className="cursor-pointer"
+              value="max"
+              aria-label="Toggle max"
+            >
+              Max
+            </ToggleGroupItem>
+          </ToggleGroup>
 
-          <Select defaultValue="volume">
-            <SelectTrigger className="w-full max-w-40 cursor-pointer">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="volume">Volume</SelectItem>
-                <SelectItem value="weight">Weight</SelectItem>
-                <SelectItem value="reps">Reps</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button className="cursor-pointer" variant="secondary">
+                <SlidersHorizontal className="size-4" />
+                Filters
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-4" align="end">
+              <PopoverHeader className="mb-4">
+                <PopoverTitle>Filters</PopoverTitle>
+                <PopoverDescription>Customize your chart.</PopoverDescription>
+              </PopoverHeader>
 
-          <Select defaultValue="pull up">
-            <SelectTrigger className="w-full max-w-40 cursor-pointer">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="pull up">Pull Up</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+              <FieldGroup className="gap-4">
+                <Field orientation="horizontal">
+                  <FieldLabel htmlFor="exercise" className="w-1/2">
+                    Exercise
+                  </FieldLabel>
+                  <Select defaultValue="pull up">
+                    <SelectTrigger className="w-full max-w-40 cursor-pointer">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="pull up">Pull Up</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field orientation="horizontal">
+                  <FieldLabel htmlFor="metric" className="w-1/2">
+                    Metric
+                  </FieldLabel>
+
+                  <Select defaultValue="volume">
+                    <SelectTrigger className="w-full max-w-40 cursor-pointer">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="volume">Volume</SelectItem>
+                        <SelectItem value="weight">Weight</SelectItem>
+                        <SelectItem value="reps">Reps</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </FieldGroup>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
