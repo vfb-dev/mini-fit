@@ -26,7 +26,10 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 
-const data = [
+import { useQuery } from "@tanstack/react-query";
+import { get_unique_exercises } from "@/api/chart";
+
+const dummyData = [
   { month: "January", value: 12500 },
   { month: "February", value: 14500 },
   { month: "March", value: 11800 },
@@ -46,7 +49,20 @@ const colors = [
   "#4d97d7",
 ];
 
+function toTitleCase(text: string) {
+  return text.replace(/\w\S*/g, (word) => {
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+}
+
 export function ProgressChart() {
+  const { data } = useQuery({
+    queryKey: ["unique_exercises"],
+    queryFn: () => get_unique_exercises(),
+  });
+
+  const unique_exercises: string[] = data ?? [];
+
   return (
     <>
       <div className="flex justify-between mb-4">
@@ -109,13 +125,17 @@ export function ProgressChart() {
                   <FieldLabel htmlFor="exercise" className="w-1/2">
                     Exercise
                   </FieldLabel>
-                  <Select defaultValue="pull up">
+                  <Select defaultValue={unique_exercises[0] ?? ""}>
                     <SelectTrigger className="w-full max-w-40 cursor-pointer">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="pull up">Pull Up</SelectItem>
+                        {unique_exercises.map((exercise) => (
+                          <SelectItem key={exercise} value={exercise}>
+                            {toTitleCase(exercise)}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -146,7 +166,7 @@ export function ProgressChart() {
 
       <div className="h-90 w-full">
         <ResponsiveBar
-          data={data}
+          data={dummyData}
           keys={["value"]}
           indexBy="month"
           margin={{ top: 20, right: 20, bottom: 45, left: 60 }}

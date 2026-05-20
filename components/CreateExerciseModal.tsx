@@ -46,6 +46,10 @@ export function CreateExerciseModal() {
         queryKey: ["exercises"],
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: ["unique_exercises"],
+      });
+
       reset();
       handleCreateModal(false);
     },

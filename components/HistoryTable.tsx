@@ -106,6 +106,10 @@ export function HistoryTable() {
       await queryClient.invalidateQueries({
         queryKey: ["exercises"],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["unique_exercises"],
+      });
     },
   });
 
