@@ -31,16 +31,6 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { get_unique_exercises, get_chart_data } from "@/api/chart";
 
-const colors = [
-  "#9bdfe7",
-  "#89d5e8",
-  "#7dccea",
-  "#6ec1ea",
-  "#61b5e7",
-  "#55a8e2",
-  "#4d97d7",
-];
-
 function toTitleCase(text: string) {
   return text.replace(/\w\S*/g, (word) => {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -94,9 +84,10 @@ export function ProgressChart() {
     <>
       <div className="flex justify-between mb-4">
         <h3 className="text-lg font-semibold">Progress</h3>
-
+        {/* Date Menu */}
         <div className="flex gap-4">
           <ToggleGroup
+            value={period}
             type="single"
             defaultValue="30D"
             onValueChange={(value) => setPeriod(value)}
@@ -138,6 +129,7 @@ export function ProgressChart() {
             </ToggleGroupItem>
           </ToggleGroup>
 
+          {/* Filters */}
           <Popover>
             <PopoverTrigger asChild>
               <Button className="cursor-pointer" variant="secondary">
@@ -203,18 +195,31 @@ export function ProgressChart() {
         </div>
       </div>
 
+      {/* Chart */}
       <div className="h-90 w-full">
         <ResponsiveBar
           data={chartData}
           keys={["value"]}
           indexBy="label"
           margin={{ top: 20, right: 20, bottom: 45, left: 60 }}
-          padding={0.28}
+          padding={chartData.length <= 3 ? 0.6 : 0.28}
           valueScale={{ type: "linear" }}
           indexScale={{ type: "band", round: true }}
           borderRadius={4}
           enableLabel={false}
-          colors={({ index }) => colors[index % colors.length]}
+          colors={({ index }) => {
+            const start = [155, 223, 231]; // #9bdfe7
+            const end = [77, 151, 215]; // #4d97d7
+
+            const factor =
+              chartData.length <= 1 ? 1 : index / (chartData.length - 1);
+
+            const r = Math.round(start[0] + (end[0] - start[0]) * factor);
+            const g = Math.round(start[1] + (end[1] - start[1]) * factor);
+            const b = Math.round(start[2] + (end[2] - start[2]) * factor);
+
+            return `rgb(${r}, ${g}, ${b})`;
+          }}
           animate
           motionConfig="gentle"
           theme={{
@@ -277,13 +282,38 @@ export function ProgressChart() {
           }}
           enableGridY
           gridYValues={5}
-          tooltip={({ value, indexValue }) => (
-            <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
-              <p className="text-xs text-zinc-400">{indexValue}</p>
-
-              <p className="text-sm font-medium text-zinc-900">
-                {value.toLocaleString()}
+          tooltip={({ value, indexValue, color }) => (
+            <div className="min-w-32 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-xl">
+              {/* date */}
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+                {indexValue}
               </p>
+
+              {/* main value */}
+              <div className="mt-2 flex items-center gap-2">
+                <div
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+
+                <span className="text-xl font-bold text-zinc-900">
+                  {Number(value).toLocaleString()}
+                </span>
+              </div>
+
+              {/* metric */}
+              <p className="mt-1 text-xs text-zinc-500">
+                {metric === "volume" && "Training Volume"}
+                {metric === "weight" && "Max Weight"}
+                {metric === "reps" && "Total Reps"}
+              </p>
+
+              {/* exercise */}
+              <div className="mt-3 border-t border-zinc-100 pt-2">
+                <p className="text-xs font-medium text-zinc-700">
+                  {toTitleCase(exercise)}
+                </p>
+              </div>
             </div>
           )}
         />
