@@ -31,6 +31,11 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { get_unique_exercises, get_chart_data } from "@/api/chart";
 
+type ChartData = {
+  label: string;
+  value: number;
+};
+
 function toTitleCase(text: string) {
   return text.replace(/\w\S*/g, (word) => {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -43,20 +48,30 @@ export function ProgressChart() {
     queryFn: () => get_unique_exercises(),
   });
 
-  const [exercise, setExercise] = useState<string>(uniqueExercises[0] ?? "");
+  const [exercise, setExercise] = useState<string>("");
   const [period, setPeriod] = useState<string>("30D");
   const [metric, setMetric] = useState<string>("volume");
 
-  const { data: chartData = [], isLoading } = useQuery({
-    queryKey: ["chart", exercise, metric, period],
+  const selectedExercise = exercise || uniqueExercises[0] || "";
+
+  const { data: chartData = [], isLoading } = useQuery<ChartData[]>({
+    queryKey: ["chart", selectedExercise, metric, period],
 
     queryFn: () =>
       get_chart_data({
-        exercise,
+        exercise: selectedExercise,
         metric,
         period,
       }),
   });
+
+  const maxChartValue = Math.max(...chartData.map((item) => item.value), 0);
+  const chartMax = maxChartValue * (chartData.length <= 3 ? 1.25 : 1.15);
+  const getBarPadding = (count: number) => {
+    if (count <= 1) return 0.9;
+    if (count <= 4) return 0.8;
+    return 0.6;
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -149,8 +164,7 @@ export function ProgressChart() {
                     Exercise
                   </FieldLabel>
                   <Select
-                    value={exercise}
-                    defaultValue={uniqueExercises[0] ?? ""}
+                    value={selectedExercise}
                     onValueChange={(value) => setExercise(value)}
                   >
                     <SelectTrigger className="w-full max-w-40 cursor-pointer">
@@ -174,7 +188,6 @@ export function ProgressChart() {
 
                   <Select
                     value={metric}
-                    defaultValue="volume"
                     onValueChange={(value) => setMetric(value)}
                   >
                     <SelectTrigger className="w-full max-w-40 cursor-pointer">
@@ -202,8 +215,11 @@ export function ProgressChart() {
           keys={["value"]}
           indexBy="label"
           margin={{ top: 20, right: 20, bottom: 45, left: 60 }}
-          padding={chartData.length <= 3 ? 0.6 : 0.28}
-          valueScale={{ type: "linear" }}
+          padding={getBarPadding(chartData.length)}
+          valueScale={{
+            type: "linear",
+            max: chartMax,
+          }}
           indexScale={{ type: "band", round: true }}
           borderRadius={4}
           enableLabel={false}
@@ -311,7 +327,7 @@ export function ProgressChart() {
               {/* exercise */}
               <div className="mt-3 border-t border-zinc-100 pt-2">
                 <p className="text-xs font-medium text-zinc-700">
-                  {toTitleCase(exercise)}
+                  {toTitleCase(selectedExercise)}
                 </p>
               </div>
             </div>
