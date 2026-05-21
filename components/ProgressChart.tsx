@@ -4,6 +4,8 @@ import { SlidersHorizontal } from "lucide-react";
 
 import { ResponsiveBar } from "@nivo/bar";
 
+import { useState } from "react";
+
 import {
   Select,
   SelectContent,
@@ -27,7 +29,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 
 import { useQuery } from "@tanstack/react-query";
-import { get_unique_exercises } from "@/api/chart";
+import { get_unique_exercises, get_chart_data } from "@/api/chart";
 
 const dummyData = [
   { month: "January", value: 12500 },
@@ -56,12 +58,29 @@ function toTitleCase(text: string) {
 }
 
 export function ProgressChart() {
-  const { data } = useQuery({
+  const [exercise, setExercise] = useState<string>("");
+  const [period, setPeriod] = useState<string>("");
+  const [metric, setMetric] = useState<string>("");
+
+  const { data: uniqueExercises = [] } = useQuery<string[]>({
     queryKey: ["unique_exercises"],
     queryFn: () => get_unique_exercises(),
   });
 
-  const unique_exercises: string[] = data ?? [];
+  const { data: chartData = [], isLoading } = useQuery({
+    queryKey: ["chart", exercise, metric, period],
+
+    queryFn: () =>
+      get_chart_data({
+        exercise,
+        metric,
+        period,
+      }),
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -69,7 +88,11 @@ export function ProgressChart() {
         <h3 className="text-lg font-semibold">Progress</h3>
 
         <div className="flex gap-4">
-          <ToggleGroup type="single" defaultValue="30D">
+          <ToggleGroup
+            type="single"
+            defaultValue="30D"
+            onValueChange={(value) => setPeriod(value)}
+          >
             <ToggleGroupItem
               className="cursor-pointer"
               value="7D"
@@ -125,13 +148,16 @@ export function ProgressChart() {
                   <FieldLabel htmlFor="exercise" className="w-1/2">
                     Exercise
                   </FieldLabel>
-                  <Select defaultValue={unique_exercises[0] ?? ""}>
+                  <Select
+                    defaultValue={uniqueExercises[0] ?? ""}
+                    onValueChange={(value) => setExercise(value)}
+                  >
                     <SelectTrigger className="w-full max-w-40 cursor-pointer">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {unique_exercises.map((exercise) => (
+                        {uniqueExercises.map((exercise) => (
                           <SelectItem key={exercise} value={exercise}>
                             {toTitleCase(exercise)}
                           </SelectItem>
@@ -145,7 +171,10 @@ export function ProgressChart() {
                     Metric
                   </FieldLabel>
 
-                  <Select defaultValue="volume">
+                  <Select
+                    defaultValue="volume"
+                    onValueChange={(value) => setMetric(value)}
+                  >
                     <SelectTrigger className="w-full max-w-40 cursor-pointer">
                       <SelectValue />
                     </SelectTrigger>
@@ -166,9 +195,9 @@ export function ProgressChart() {
 
       <div className="h-90 w-full">
         <ResponsiveBar
-          data={dummyData}
+          data={chartData}
           keys={["value"]}
-          indexBy="month"
+          indexBy="label"
           margin={{ top: 20, right: 20, bottom: 45, left: 60 }}
           padding={0.28}
           valueScale={{ type: "linear" }}

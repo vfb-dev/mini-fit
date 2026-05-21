@@ -9,3 +9,19 @@ export async function get_unique_exercises() {
 
   return response.json();
 }
+
+export async function get_chart_data(params: {
+  exercise: string;
+  metric: string;
+  period: string;
+}) {
+  const searchParams = new URLSearchParams({
+    exercise: params.exercise,
+    metric: params.metric,
+    period: params.period,
+  });
+
+  const response = await fetch(`${API_URL}/chart/?${searchParams}`);
+
+  return response.json();
+}
