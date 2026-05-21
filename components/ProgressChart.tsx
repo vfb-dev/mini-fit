@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Dumbbell } from "lucide-react";
 
 import { ResponsiveBar } from "@nivo/bar";
 
@@ -31,16 +31,6 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { get_unique_exercises, get_chart_data } from "@/api/chart";
 
-const dummyData = [
-  { month: "January", value: 12500 },
-  { month: "February", value: 14500 },
-  { month: "March", value: 11800 },
-  { month: "April", value: 9800 },
-  { month: "May", value: 14200 },
-  { month: "June", value: 23500 },
-  { month: "July", value: 19800 },
-];
-
 const colors = [
   "#9bdfe7",
   "#89d5e8",
@@ -58,14 +48,14 @@ function toTitleCase(text: string) {
 }
 
 export function ProgressChart() {
-  const [exercise, setExercise] = useState<string>("");
-  const [period, setPeriod] = useState<string>("");
-  const [metric, setMetric] = useState<string>("");
-
   const { data: uniqueExercises = [] } = useQuery<string[]>({
     queryKey: ["unique_exercises"],
     queryFn: () => get_unique_exercises(),
   });
+
+  const [exercise, setExercise] = useState<string>(uniqueExercises[0] ?? "");
+  const [period, setPeriod] = useState<string>("30D");
+  const [metric, setMetric] = useState<string>("volume");
 
   const { data: chartData = [], isLoading } = useQuery({
     queryKey: ["chart", exercise, metric, period],
@@ -80,6 +70,24 @@ export function ProgressChart() {
 
   if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (!chartData.length) {
+    return (
+      <div className="flex h-90 w-full flex-col items-center justify-center rounded-2xl border border-dashed bg-zinc-50/50 text-center">
+        <div className="mb-4 rounded-full bg-white p-4 shadow-sm">
+          <Dumbbell className="size-6 text-zinc-400" />
+        </div>
+
+        <h3 className="text-sm font-semibold text-zinc-900">
+          No progress data yet
+        </h3>
+
+        <p className="mt-1 max-w-xs text-sm text-zinc-500">
+          Start logging workouts to visualize your training progress.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -149,6 +157,7 @@ export function ProgressChart() {
                     Exercise
                   </FieldLabel>
                   <Select
+                    value={exercise}
                     defaultValue={uniqueExercises[0] ?? ""}
                     onValueChange={(value) => setExercise(value)}
                   >
@@ -172,6 +181,7 @@ export function ProgressChart() {
                   </FieldLabel>
 
                   <Select
+                    value={metric}
                     defaultValue="volume"
                     onValueChange={(value) => setMetric(value)}
                   >
