@@ -62,7 +62,7 @@ class ExerciseViewset(viewsets.ModelViewSet):
 
         data = [
             {
-                "label": item["day"].strftime("%b %d"),
+                "label": item["day"].strftime("%b %d, %Y"),
                 "value": item["value"],
             }
             for item in queryset.order_by("day")

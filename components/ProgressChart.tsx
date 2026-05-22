@@ -104,8 +104,7 @@ export function ProgressChart() {
           <ToggleGroup
             value={period}
             type="single"
-            defaultValue="30D"
-            onValueChange={(value) => setPeriod(value)}
+            onValueChange={(value) => value && setPeriod(value)}
           >
             <ToggleGroupItem
               className="cursor-pointer"
