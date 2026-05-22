@@ -43,18 +43,18 @@ function toTitleCase(text: string) {
 }
 
 export function ProgressChart() {
+  const [exercise, setExercise] = useState<string>("");
+  const [period, setPeriod] = useState<string>("30D");
+  const [metric, setMetric] = useState<string>("volume");
+
   const { data: uniqueExercises = [] } = useQuery<string[]>({
     queryKey: ["unique_exercises"],
     queryFn: () => get_unique_exercises(),
   });
 
-  const [exercise, setExercise] = useState<string>("");
-  const [period, setPeriod] = useState<string>("30D");
-  const [metric, setMetric] = useState<string>("volume");
-
   const selectedExercise = exercise || uniqueExercises[0] || "";
 
-  const { data: chartData = [], isLoading } = useQuery<ChartData[]>({
+  const { data: chartData = [] } = useQuery<ChartData[]>({
     queryKey: ["chart", selectedExercise, metric, period],
 
     queryFn: () =>
@@ -63,6 +63,8 @@ export function ProgressChart() {
         metric,
         period,
       }),
+
+    placeholderData: (previousData) => previousData,
   });
 
   const maxChartValue = Math.max(...chartData.map((item) => item.value), 0);
@@ -72,10 +74,6 @@ export function ProgressChart() {
     if (count <= 4) return 0.8;
     return 0.6;
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   if (!chartData.length) {
     return (
