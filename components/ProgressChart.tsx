@@ -107,35 +107,35 @@ export function ProgressChart() {
             onValueChange={(value) => value && setPeriod(value)}
           >
             <ToggleGroupItem
-              className="cursor-pointer"
+              className="cursor-pointer w-12"
               value="7D"
               aria-label="Toggle 7D"
             >
               7D
             </ToggleGroupItem>
             <ToggleGroupItem
-              className="cursor-pointer"
+              className="cursor-pointer w-12"
               value="30D"
               aria-label="Toggle 30D"
             >
               30D
             </ToggleGroupItem>
             <ToggleGroupItem
-              className="cursor-pointer"
+              className="cursor-pointer w-12"
               value="90D"
               aria-label="Toggle 90D"
             >
               90D
             </ToggleGroupItem>
             <ToggleGroupItem
-              className="cursor-pointer"
+              className="cursor-pointer w-12"
               value="1Y"
               aria-label="Toggle 90D"
             >
               1Y
             </ToggleGroupItem>
             <ToggleGroupItem
-              className="cursor-pointer"
+              className="cursor-pointer w-12"
               value="max"
               aria-label="Toggle max"
             >
