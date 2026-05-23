@@ -7,7 +7,7 @@ from .serializers import ExerciseSerializer
 from .pagination import ExercisePagination
 
 from django.db.models import Sum, Max, Avg, F
-from django.db.models.functions import TruncDay
+from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 from datetime import timedelta
 from django.utils import timezone
 
@@ -38,34 +38,43 @@ class ExerciseViewset(viewsets.ModelViewSet):
         # filter period
         now = timezone.now()
 
-        period_map = {
-            "7D": 7,
-            "30D": 30,
-            "90D": 90,
-            "1Y": 365,
-        }
-
+        period_map = { "7D": 7, "30D": 30, "90D": 90, "1Y": 365,}
+        
         if period in period_map:
             desired_period = now - timedelta(days=period_map[period])
             queryset = queryset.filter(date__gte=desired_period)
 
         # group by day
-        queryset = queryset.annotate(day=TruncDay("date"))
+        if period in ["7D", "30D", "90D"]:
+            queryset = queryset.annotate(group_date=TruncDay("date"))
+        elif period == "1Y":
+            queryset = queryset.annotate(group_date=TruncMonth("date"))
+        else:
+            queryset = queryset.annotate(group_date=TruncYear("date"))
 
         # metric logic
         if metric == "volume":
-            queryset = queryset.annotate(calculated=F("weight") * F("reps")).values("day").annotate(value=Sum("calculated"))
+            queryset = queryset.annotate(calculated=F("weight") * F("reps")).values("group_date").annotate(value=Sum("calculated"))
         elif metric == "weight":
-            queryset = queryset.values("day").annotate(value=Max("weight"))
+            queryset = queryset.values("group_date").annotate(value=Max("weight"))
         elif metric == "reps":
-            queryset = queryset.values("day").annotate(value=Sum("reps"))
+            queryset = queryset.values("group_date").annotate(value=Sum("reps"))
+
+        short_label_format = ""
+        if period in ["7D", "30D", "90D"]:
+            short_label_format = "%b %d"
+        elif period == "1Y":
+            short_label_format = "%b"
+        else:
+            short_label_format = "%Y"
 
         data = [
             {
-                "label": item["day"].strftime("%b %d, %Y"),
+                "label": item["group_date"].strftime(short_label_format),
+                "tooltip_label": item["group_date"].strftime("%b %d, %Y"),
                 "value": item["value"],
             }
-            for item in queryset.order_by("day")
+            for item in queryset.order_by("group_date")
         ]
 
         return Response(data)

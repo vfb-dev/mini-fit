@@ -33,6 +33,7 @@ import { get_unique_exercises, get_chart_data } from "@/api/chart";
 
 type ChartData = {
   label: string;
+  tooltip_label: string;
   value: number;
 };
 
@@ -74,6 +75,14 @@ export function ProgressChart() {
     if (count <= 4) return 0.8;
     return 0.6;
   };
+  const visibleTicks = chartData
+    .filter((_, index) => {
+      if (chartData.length <= 7) return true;
+      if (chartData.length <= 14) return index % 2 === 0;
+
+      return index % 3 === 0;
+    })
+    .map((item) => item.label);
 
   if (!chartData.length) {
     return (
@@ -287,6 +296,8 @@ export function ProgressChart() {
           axisBottom={{
             tickSize: 0,
             tickPadding: 12,
+            tickRotation: chartData.length > 7 ? -25 : 0,
+            tickValues: visibleTicks,
           }}
           axisLeft={{
             tickSize: 0,
@@ -295,11 +306,11 @@ export function ProgressChart() {
           }}
           enableGridY
           gridYValues={5}
-          tooltip={({ value, indexValue, color }) => (
+          tooltip={({ value, color, data }) => (
             <div className="min-w-32 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-xl">
               {/* date */}
               <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
-                {indexValue}
+                {data.tooltip_label}
               </p>
 
               {/* main value */}
