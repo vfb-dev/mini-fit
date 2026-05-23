@@ -1,10 +1,11 @@
 "use client";
 
-import { SlidersHorizontal, Dumbbell } from "lucide-react";
+import { SlidersHorizontal, Dumbbell, Calendar } from "lucide-react";
 
 import { ResponsiveBar } from "@nivo/bar";
 
 import { useState } from "react";
+import { useMediaQuery } from "usehooks-ts";
 
 import {
   Select,
@@ -44,6 +45,8 @@ function toTitleCase(text: string) {
 }
 
 export function ProgressChart() {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   const [exercise, setExercise] = useState<string>("");
   const [period, setPeriod] = useState<string>("30D");
   const [metric, setMetric] = useState<string>("volume");
@@ -107,48 +110,77 @@ export function ProgressChart() {
       <div className="flex justify-between mb-4">
         <h3 className="text-lg font-semibold">Progress</h3>
         {/* Date Menu */}
-        <div className="flex gap-4">
-          <ToggleGroup
-            value={period}
-            type="single"
-            onValueChange={(value) => value && setPeriod(value)}
-          >
-            <ToggleGroupItem
-              className="cursor-pointer w-12"
-              value="7D"
-              aria-label="Toggle 7D"
+        <div className="flex gap-2 md:gap-4">
+          {isMobile ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="secondary"
+                  className="justify-between cursor-pointer"
+                >
+                  <Calendar className="size-4 text-zinc-500" />
+                  {period}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-40 p-2" align="end">
+                <div className="flex flex-col gap-1">
+                  {["7D", "30D", "90D", "1Y", "Max"].map((value) => (
+                    <Button
+                      key={value}
+                      variant={period === value ? "default" : "ghost"}
+                      className="justify-start"
+                      onClick={() => setPeriod(value)}
+                    >
+                      {value === "max" ? "Max" : value}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <ToggleGroup
+              value={period}
+              type="single"
+              onValueChange={(value) => value && setPeriod(value)}
             >
-              7D
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className="cursor-pointer w-12"
-              value="30D"
-              aria-label="Toggle 30D"
-            >
-              30D
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className="cursor-pointer w-12"
-              value="90D"
-              aria-label="Toggle 90D"
-            >
-              90D
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className="cursor-pointer w-12"
-              value="1Y"
-              aria-label="Toggle 90D"
-            >
-              1Y
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className="cursor-pointer w-12"
-              value="max"
-              aria-label="Toggle max"
-            >
-              Max
-            </ToggleGroupItem>
-          </ToggleGroup>
+              <ToggleGroupItem
+                className="cursor-pointer w-12"
+                value="7D"
+                aria-label="Toggle 7D"
+              >
+                7D
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className="cursor-pointer w-12"
+                value="30D"
+                aria-label="Toggle 30D"
+              >
+                30D
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className="cursor-pointer w-12"
+                value="90D"
+                aria-label="Toggle 90D"
+              >
+                90D
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className="cursor-pointer w-12"
+                value="1Y"
+                aria-label="Toggle 90D"
+              >
+                1Y
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className="cursor-pointer w-12"
+                value="max"
+                aria-label="Toggle max"
+              >
+                Max
+              </ToggleGroupItem>
+            </ToggleGroup>
+          )}
 
           {/* Filters */}
           <Popover>
@@ -220,7 +252,12 @@ export function ProgressChart() {
           data={chartData}
           keys={["value"]}
           indexBy="label"
-          margin={{ top: 20, right: 20, bottom: 45, left: 60 }}
+          margin={{
+            top: 20,
+            right: isMobile ? 8 : 20,
+            bottom: 45,
+            left: isMobile ? 30 : 60,
+          }}
           padding={getBarPadding(chartData.length)}
           valueScale={{
             type: "linear",
@@ -296,7 +333,7 @@ export function ProgressChart() {
           axisBottom={{
             tickSize: 0,
             tickPadding: 12,
-            tickRotation: chartData.length > 7 ? -25 : 0,
+            tickRotation: isMobile ? -45 : chartData.length > 7 ? -25 : 0,
             tickValues: visibleTicks,
           }}
           axisLeft={{
