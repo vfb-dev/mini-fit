@@ -54,6 +54,10 @@ export function CreateExerciseModal() {
         queryKey: ["chart"],
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: ["stats_cards"],
+      });
+
       reset();
       handleCreateModal(false);
     },

@@ -108,6 +108,10 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
         queryKey: ["chart"],
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: ["stats_cards"],
+      });
+
       reset();
       handleEditModal(false);
     },

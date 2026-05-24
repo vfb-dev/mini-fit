@@ -114,6 +114,10 @@ export function HistoryTable() {
       await queryClient.invalidateQueries({
         queryKey: ["chart"],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["stats_cards"],
+      });
     },
   });
 

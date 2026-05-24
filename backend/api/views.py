@@ -7,7 +7,7 @@ from .serializers import ExerciseSerializer
 from .pagination import ExercisePagination
 
 from django.db.models import Sum, Max, Avg, F
-from django.db.models.functions import TruncDay, TruncMonth, TruncYear
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
 from datetime import timedelta
 from django.utils import timezone
 
@@ -78,3 +78,125 @@ class ExerciseViewset(viewsets.ModelViewSet):
         ]
 
         return Response(data)
+    
+    @action(detail=False, methods=["get"])
+    def stats_cards(self, request):
+        queryset = Exercise.objects.all()
+
+        # 🔥 Streak
+        workout_days = list(
+            queryset
+            .values_list("date__date", flat=True)
+            .distinct()
+            .order_by("-date__date")
+        )
+
+        streak = 0
+
+        if workout_days:
+            streak = 1
+
+        for i in range(len(workout_days) - 1):
+            current_day = workout_days[i]
+            next_day = workout_days[i + 1]
+
+            difference = current_day - next_day
+
+            if difference <= timedelta(days=2):
+                streak += 1
+            else:
+                break
+
+        # 📦 Weekly Volume Progress
+        weekly_volume = (
+            queryset
+            .annotate(group_date=TruncWeek("date"))
+            .annotate(volume=F("weight") * F("reps"))
+            .values("group_date")
+            .annotate(total_volume=Sum("volume"))
+            .order_by("group_date")
+        )
+
+        weekly_volume = list(weekly_volume)
+
+        volume_progressions = []
+
+        for i in range(1, len(weekly_volume)):
+            current = weekly_volume[i]["total_volume"] or 0
+            previous = weekly_volume[i - 1]["total_volume"] or 0
+
+            if previous > 0:
+                progress = ((current - previous) / previous) * 100
+                volume_progressions.append(progress)
+
+        avg_weekly_volume_progress = (
+            sum(volume_progressions) / len(volume_progressions)
+            if volume_progressions
+            else 0
+        )
+
+        # 🔁 Weekly Reps Progress
+        weekly_reps = (
+            queryset
+            .annotate(group_date=TruncWeek("date"))
+            .values("group_date")
+            .annotate(total_reps=Sum("reps"))
+            .order_by("group_date")
+        )
+
+        weekly_reps = list(weekly_reps)
+
+        reps_progressions = []
+
+        for i in range(1, len(weekly_reps)):
+            current = weekly_reps[i]["total_reps"] or 0
+            previous = weekly_reps[i - 1]["total_reps"] or 0
+
+            if previous > 0:
+                progress = ((current - previous) / previous) * 100
+                reps_progressions.append(progress)
+
+        avg_weekly_reps_progress = (
+            sum(reps_progressions) / len(reps_progressions)
+            if reps_progressions
+            else 0
+        )
+
+        # 🏋️ Weekly Weight Progress
+        weekly_weight = (
+            queryset
+            .annotate(group_date=TruncWeek("date"))
+            .values("group_date")
+            .annotate(avg_weight=Avg("weight"))
+            .order_by("group_date")
+        )
+
+        weekly_weight = list(weekly_weight)
+
+        weight_progressions = []
+
+        for i in range(1, len(weekly_weight)):
+            current = weekly_weight[i]["avg_weight"] or 0
+            previous = weekly_weight[i - 1]["avg_weight"] or 0
+
+            if previous > 0:
+                progress = ((current - previous) / previous) * 100
+                weight_progressions.append(progress)
+
+        avg_weekly_weight_progress = (
+            sum(weight_progressions) / len(weight_progressions)
+            if weight_progressions
+            else 0
+        )
+
+        data = {
+            "streak": streak,
+            "avg_weekly_volume_progress": round(avg_weekly_volume_progress, 1),
+            "avg_weekly_reps_progress": round(avg_weekly_reps_progress, 1),
+            "avg_weekly_weight_progress": round(avg_weekly_weight_progress, 1),
+        }
+
+        return Response(data)
+
+
+
