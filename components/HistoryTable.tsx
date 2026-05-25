@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, NotebookPen } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -39,11 +39,10 @@ import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/modalStore";
 import { getExercises, deleteExercise } from "@/api/exercises";
 
-import { format } from "date-fns";
-
 type Exercise = {
   id: number;
   date: string;
+  formatted_date: string;
   name: string;
   reps: number;
   weight: number;
@@ -56,16 +55,12 @@ type ExercisesResponse = {
   results: Exercise[];
 };
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 function toTitleCase(text: string) {
   return text.replace(/\w\S*/g, (word) => {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   });
-}
-
-function formatExerciseDate(dateString: string) {
-  return format(new Date(dateString), "dd/MM/yyyy HH:mm");
 }
 
 export function HistoryTable() {
@@ -134,10 +129,11 @@ export function HistoryTable() {
         <h3 className="text-lg font-semibold">History</h3>
 
         <Button
-          className="cursor-pointer"
+          className="cursor-pointer gap-2"
           onClick={() => handleCreateModal(true)}
         >
-          Add Exercise
+          <NotebookPen className="size-4" />
+          New Entry
         </Button>
       </div>
 
@@ -157,53 +153,64 @@ export function HistoryTable() {
         </TableHeader>
 
         <TableBody>
-          {exercises.map((exercise) => (
-            <TableRow key={exercise.id}>
-              <TableCell>{formatExerciseDate(exercise.date)}</TableCell>
+          {exercises.length ? (
+            exercises.map((exercise) => (
+              <TableRow key={exercise.id}>
+                <TableCell>{exercise.formatted_date}</TableCell>
 
-              <TableCell>{toTitleCase(exercise.name)}</TableCell>
+                <TableCell>{toTitleCase(exercise.name)}</TableCell>
 
-              <TableCell>{exercise.reps}</TableCell>
+                <TableCell>{exercise.reps}</TableCell>
 
-              <TableCell>{exercise.weight}</TableCell>
+                <TableCell>{exercise.weight}</TableCell>
 
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 cursor-pointer"
-                    >
-                      <MoreHorizontal />
-                    </Button>
-                  </DropdownMenuTrigger>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 cursor-pointer"
+                      >
+                        <MoreHorizontal />
+                      </Button>
+                    </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setSelectedExercise(exercise);
-                        handleEditModal(true);
-                      }}
-                    >
-                      Edit
-                    </DropdownMenuItem>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedExercise(exercise);
+                          handleEditModal(true);
+                        }}
+                      >
+                        Edit
+                      </DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
+                      <DropdownMenuSeparator />
 
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      variant="destructive"
-                      onClick={() => deleteMutation.mutate(exercise.id)}
-                    >
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        variant="destructive"
+                        onClick={() => deleteMutation.mutate(exercise.id)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={5}
+                className="h-24 text-center text-muted-foreground"
+              >
+                No exercises found.
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
 

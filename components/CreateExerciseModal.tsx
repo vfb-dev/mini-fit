@@ -15,6 +15,7 @@ import { createExercise } from "@/api/exercises";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const schema = z.object({
+  date: z.string().min(1, "Required"),
   name: z.string().min(1, "Required"),
   reps: z.number().min(1, "Minimum 1 rep"),
   weight: z
@@ -85,6 +86,23 @@ export function CreateExerciseModal() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-4">
+                {/* Date */}
+                <div className="grid gap-2">
+                  <Label htmlFor="date">Date</Label>
+
+                  <Input
+                    id="date"
+                    type="datetime-local"
+                    {...register("date")}
+                  />
+
+                  {errors.date && (
+                    <p className="text-sm text-red-500">
+                      {errors.date.message}
+                    </p>
+                  )}
+                </div>
+
                 {/* Exercise */}
                 <div className="grid gap-2">
                   <div className="flex items-center">

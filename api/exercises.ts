@@ -11,6 +11,7 @@ export async function getExercises(page = 1) {
 }
 
 export async function createExercise(exerciseData: {
+  date: string;
   name: string;
   reps: number;
   weight: number;
