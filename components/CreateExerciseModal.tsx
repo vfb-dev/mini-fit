@@ -14,6 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createExercise } from "@/api/exercises";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { format } from "date-fns";
+import { useEffect } from "react";
+
 const schema = z.object({
   date: z.string().min(1, "Required"),
   name: z.string().min(1, "Required"),
@@ -34,10 +37,17 @@ export function CreateExerciseModal() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  useEffect(() => {
+    if (createModal) {
+      setValue("date", format(new Date(), "yyyy-MM-dd'T'HH:mm"));
+    }
+  }, [createModal, setValue]);
 
   const createMutation = useMutation({
     mutationFn: createExercise,
