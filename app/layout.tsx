@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 
 import { Providers } from "./providers";
+import { MobileMenu } from "@/components/MobileMenu";
 import { Sidebar } from "@/components/Sidebar";
 
 const inter = Inter({
@@ -23,11 +24,18 @@ export default function RootLayout({
     <html lang="en" className={`${inter.className} h-full antialiased`}>
       <body className="min-h-screen bg-gray-50">
         <div className="flex min-h-screen">
-          {/* Sidebar */}
-          <Sidebar />
+          {/* Sidebar: hidden on mobile */}
+          <div className="hidden md:block">
+            <Sidebar />
+          </div>
 
           {/* Content */}
           <main className="flex-1">
+            {/* Topbar: only mobile */}
+            <div className="block md:hidden">
+              <MobileMenu />
+            </div>
+
             <div className="flex min-h-screen justify-center">
               <Providers>{children}</Providers>
             </div>

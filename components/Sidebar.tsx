@@ -119,6 +119,32 @@ export function Sidebar() {
           )}
         </a>
 
+        {/* Account */}
+        <a
+          href=""
+          className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
+            collapsed ? "justify-center px-0" : "gap-4 px-4"
+          }`}
+        >
+          <User className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+
+          <span
+            className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
+              collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
+            }`}
+          >
+            {language === "en" ? "Account" : "Conta"}
+          </span>
+
+          {collapsed && (
+            <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
+              {language === "en" ? "Account" : "Conta"}
+            </div>
+          )}
+        </a>
+
+        <Separator />
+
         {/* Login */}
         <a
           href=""
@@ -163,30 +189,6 @@ export function Sidebar() {
           {collapsed && (
             <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
               {language === "en" ? "Register" : "Registrar"}
-            </div>
-          )}
-        </a>
-
-        {/* Account */}
-        <a
-          href=""
-          className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
-            collapsed ? "justify-center px-0" : "gap-4 px-4"
-          }`}
-        >
-          <User className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
-
-          <span
-            className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-              collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
-            }`}
-          >
-            {language === "en" ? "Account" : "Conta"}
-          </span>
-
-          {collapsed && (
-            <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-              {language === "en" ? "Account" : "Conta"}
             </div>
           )}
         </a>
