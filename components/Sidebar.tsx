@@ -35,7 +35,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`relative flex flex-col overflow-visible border-r bg-white px-4 transition-all duration-500 ease-in-out ${
+      className={`sticky top-0 flex h-screen flex-col overflow-visible border-r bg-white px-4 transition-all duration-500 ease-in-out ${
         collapsed ? "w-24" : "w-48"
       }`}
     >
