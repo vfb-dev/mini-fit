@@ -9,6 +9,8 @@ import { Button } from "./ui/button";
 
 import { Menu, X, ChartColumn, User, LogIn, UserPlus } from "lucide-react";
 
+import Link from "next/link";
+
 const yujiBoku = Yuji_Boku({
   weight: "400",
   subsets: ["latin"],
@@ -87,44 +89,44 @@ export function MobileMenu() {
         {/* Nav */}
         <nav className="mt-6 flex flex-col gap-2">
           {/* Workouts */}
-          <a
-            href=""
+          <Link
+            href="/"
             className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
           >
             <ChartColumn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
             <span>{language === "en" ? "Workouts" : "Treinos"}</span>
-          </a>
+          </Link>
 
           {/* Account */}
-          <a
-            href=""
+          <Link
+            href="/account"
             className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
           >
             <User className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
             <span>{language === "en" ? "Account" : "Conta"}</span>
-          </a>
+          </Link>
 
           {/* Login */}
-          <a
-            href=""
+          <Link
+            href="/login"
             className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
           >
             <LogIn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
             <span>{language === "en" ? "Login" : "Entrar"}</span>
-          </a>
+          </Link>
 
           {/* Register */}
-          <a
-            href=""
+          <Link
+            href="/register"
             className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
           >
             <UserPlus className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
             <span>{language === "en" ? "Register" : "Registrar"}</span>
-          </a>
+          </Link>
         </nav>
       </aside>
     </>

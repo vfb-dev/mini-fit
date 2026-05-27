@@ -16,6 +16,8 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 
+import Link from "next/link";
+
 const yujiBoku = Yuji_Boku({
   weight: "400",
   subsets: ["latin"],
@@ -96,8 +98,8 @@ export function Sidebar() {
       {/* Nav */}
       <nav className="mt-6 flex flex-col gap-2">
         {/* Workouts */}
-        <a
-          href=""
+        <Link
+          href="/"
           className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
             collapsed ? "justify-center px-0" : "gap-4 px-4"
           }`}
@@ -117,11 +119,11 @@ export function Sidebar() {
               {language === "en" ? "Workouts" : "Treinos"}
             </div>
           )}
-        </a>
+        </Link>
 
         {/* Account */}
-        <a
-          href=""
+        <Link
+          href="/account"
           className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
             collapsed ? "justify-center px-0" : "gap-4 px-4"
           }`}
@@ -141,13 +143,13 @@ export function Sidebar() {
               {language === "en" ? "Account" : "Conta"}
             </div>
           )}
-        </a>
+        </Link>
 
         <Separator />
 
         {/* Login */}
-        <a
-          href=""
+        <Link
+          href="/login"
           className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
             collapsed ? "justify-center px-0" : "gap-4 px-4"
           }`}
@@ -167,11 +169,11 @@ export function Sidebar() {
               {language === "en" ? "Login" : "Entrar"}
             </div>
           )}
-        </a>
+        </Link>
 
         {/* Register */}
-        <a
-          href=""
+        <Link
+          href="/register"
           className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
             collapsed ? "justify-center px-0" : "gap-4 px-4"
           }`}
@@ -191,7 +193,7 @@ export function Sidebar() {
               {language === "en" ? "Register" : "Registrar"}
             </div>
           )}
-        </a>
+        </Link>
       </nav>
     </aside>
   );
