@@ -18,15 +18,6 @@ class ExerciseSerializer(serializers.ModelSerializer):
         now = timezone.localtime()
         date = timezone.localtime(obj.date)
 
-        today = now.date()
-        yesterday = today - timedelta(days=1)
-
-        if date.date() == today:
-            return "Today"
-
-        if date.date() == yesterday:
-            return "Yesterday"
-
         # Same year → 24 May
         if date.year == now.year:
             return date.strftime("%d %b")
