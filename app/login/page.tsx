@@ -10,12 +10,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 pb-10">
       {/* Card */}
-      <div className="w-full md:w-100 bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
+      <div className="w-full md:w-90 bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-zinc-900">Welcome back</h1>
+          <h1 className="text-2xl font-bold text-zinc-900">Welcome back</h1>
 
-          <p className="text-sm text-zinc-500 mt-2">
+          <p className="text-sm text-zinc-500 mt-1">
             Login to continue your journey
           </p>
         </div>
