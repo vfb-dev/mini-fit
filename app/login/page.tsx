@@ -1,12 +1,54 @@
-import Link from "next/link";
+"use client";
 
 import { Mail, Lock } from "lucide-react";
+
+import { useState } from "react";
+
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { useRouter } from "next/navigation";
+
 export default function LoginPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:8000/api/token/", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log(data);
+
+      if (response.ok) {
+        router.refresh();
+        router.push("/");
+      } else {
+        alert("Invalid credentials");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 pb-10">
       {/* Card */}
@@ -21,7 +63,7 @@ export default function LoginPage() {
         </div>
 
         {/* Form */}
-        <form className="flex flex-col">
+        <form className="flex flex-col" onSubmit={handleLogin}>
           {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -34,6 +76,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="example@gmail.com"
                 className="pl-10 h-11 rounded-xl"
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>
@@ -50,6 +93,7 @@ export default function LoginPage() {
                 type="password"
                 placeholder="********"
                 className="pl-10 h-11 rounded-xl"
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
@@ -63,7 +107,10 @@ export default function LoginPage() {
           </Link>
 
           {/* Button */}
-          <Button className="h-11 mt-8 rounded-xl cursor-pointer text-base font-medium">
+          <Button
+            type="submit"
+            className="h-11 mt-8 rounded-xl cursor-pointer text-base font-medium"
+          >
             Login
           </Button>
         </form>

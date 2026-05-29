@@ -11,6 +11,9 @@ from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYea
 from datetime import timedelta
 from django.utils import timezone
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import status
+
 # Create your views here.
 class ExerciseViewset(viewsets.ModelViewSet):
     queryset = Exercise.objects.all().order_by("-date")
@@ -198,5 +201,36 @@ class ExerciseViewset(viewsets.ModelViewSet):
 
         return Response(data)
 
+class LoginView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
 
+        if response.status_code == 200:
+            access = response.data["access"]
+            refresh = response.data["refresh"]
+
+            res = Response(
+                {"success": True},
+                status=status.HTTP_200_OK
+            )
+
+            res.set_cookie(
+                key="access_token",
+                value=access,
+                httponly=True,
+                secure=False,  # True in production
+                samesite="Lax",
+            )
+
+            res.set_cookie(
+                key="refresh_token",
+                value=refresh,
+                httponly=True,
+                secure=False,  # True in production
+                samesite="Lax",
+            )
+
+            return res
+
+        return response
 

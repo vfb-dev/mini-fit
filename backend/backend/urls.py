@@ -17,9 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from api.views import LoginView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     # API Endpoints
     path("api/v1/", include("api.urls")),
+
+    # JWT
+    path("api/token/", LoginView.as_view()),
 ]
