@@ -12,8 +12,11 @@ import { Label } from "@/components/ui/label";
 
 import { useRouter } from "next/navigation";
 
+import { useAuthStore } from "@/store/authStore";
+
 export default function LoginPage() {
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,11 +37,15 @@ export default function LoginPage() {
         }),
       });
 
-      const data = await response.json();
-
-      console.log(data);
-
       if (response.ok) {
+        const meResponse = await fetch("http://localhost:8000/me/", {
+          credentials: "include",
+        });
+
+        const user = await meResponse.json();
+
+        setUser(user);
+
         router.refresh();
         router.push("/");
       } else {

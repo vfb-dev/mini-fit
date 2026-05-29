@@ -18,12 +18,18 @@ import {
 
 import Link from "next/link";
 
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
+
 const yujiBoku = Yuji_Boku({
   weight: "400",
   subsets: ["latin"],
 });
 
 export function Sidebar() {
+  const router = useRouter();
+  const { user, setUser } = useAuthStore();
+
   const [language, setLanguage] = useState<"en" | "pt">("en");
   const [collapsed, setCollapsed] = useState(false);
 
@@ -33,6 +39,23 @@ export function Sidebar() {
 
   const toggleSidebar = () => {
     setCollapsed((prev) => !prev);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/logout/", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setUser(null);
+        router.push("/login");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -145,55 +168,49 @@ export function Sidebar() {
           )}
         </Link>
 
-        <Separator />
+        {user ? (
+          <Button className="mt-2 cursor-pointer" onClick={handleLogout}>
+            Logout
+          </Button>
+        ) : (
+          <>
+            {/* Login */}
+            <Link
+              href="/login"
+              className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
+                collapsed ? "justify-center px-0" : "gap-4 px-4"
+              }`}
+            >
+              <LogIn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-        {/* Login */}
-        <Link
-          href="/login"
-          className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
-            collapsed ? "justify-center px-0" : "gap-4 px-4"
-          }`}
-        >
-          <LogIn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+              <span
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
+                  collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
+                }`}
+              >
+                {language === "en" ? "Login" : "Entrar"}
+              </span>
+            </Link>
 
-          <span
-            className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-              collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
-            }`}
-          >
-            {language === "en" ? "Login" : "Entrar"}
-          </span>
+            {/* Register */}
+            <Link
+              href="/register"
+              className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
+                collapsed ? "justify-center px-0" : "gap-4 px-4"
+              }`}
+            >
+              <UserPlus className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-          {collapsed && (
-            <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-              {language === "en" ? "Login" : "Entrar"}
-            </div>
-          )}
-        </Link>
-
-        {/* Register */}
-        <Link
-          href="/register"
-          className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
-            collapsed ? "justify-center px-0" : "gap-4 px-4"
-          }`}
-        >
-          <UserPlus className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
-
-          <span
-            className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-              collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
-            }`}
-          >
-            {language === "en" ? "Register" : "Registrar"}
-          </span>
-
-          {collapsed && (
-            <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-              {language === "en" ? "Register" : "Registrar"}
-            </div>
-          )}
-        </Link>
+              <span
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
+                  collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
+                }`}
+              >
+                {language === "en" ? "Register" : "Registrar"}
+              </span>
+            </Link>
+          </>
+        )}
       </nav>
     </aside>
   );

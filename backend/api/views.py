@@ -13,6 +13,9 @@ from django.utils import timezone
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status
+from rest_framework.views import APIView
+
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 class ExerciseViewset(viewsets.ModelViewSet):
@@ -233,4 +236,26 @@ class LoginView(TokenObtainPairView):
             return res
 
         return response
+    
+class LogoutView(APIView):
+    def post(self, request):
+        response = Response(
+            {"success": True},
+            status=status.HTTP_200_OK
+        )
+
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+
+        return response
+    
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "id": request.user.id,
+            "email": request.user.email,
+        })
 
