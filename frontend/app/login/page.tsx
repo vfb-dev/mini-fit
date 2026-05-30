@@ -22,9 +22,12 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setError("");
 
     try {
       await login(email, password);
@@ -34,6 +37,7 @@ export default function LoginPage() {
 
       router.push("/");
     } catch (error) {
+      setError("Invalid email or password.");
       console.error(error);
     }
   };
@@ -90,15 +94,17 @@ export default function LoginPage() {
           {/* Forgot Password */}
           <Link
             href=""
-            className="mt-1 text-sm text-right text-zinc-500 hover:text-black transition"
+            className="mt-1 mb-6 text-sm text-right text-zinc-500 hover:text-black transition"
           >
             Forgot password?
           </Link>
 
+          {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
+
           {/* Button */}
           <Button
             type="submit"
-            className="h-11 mt-8 rounded-xl cursor-pointer text-base font-medium"
+            className="h-11 mt-2 rounded-xl cursor-pointer text-base font-medium"
           >
             Login
           </Button>
