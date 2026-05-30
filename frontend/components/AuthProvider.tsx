@@ -3,25 +3,16 @@
 import { useEffect } from "react";
 
 import { useAuthStore } from "@/store/authStore";
+import { getUser } from "@/api/auth";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const setUser = useAuthStore((state) => state.setUser);
-  const setLoading = useAuthStore((state) => state.setLoading);
+  const { setUser, setLoading } = useAuthStore();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("http://localhost:8000/me/", {
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const user = await response.json();
-
-          setUser(user);
-        } else {
-          setUser(null);
-        }
+        const user = await getUser();
+        setUser(user);
       } catch {
         setUser(null);
       } finally {

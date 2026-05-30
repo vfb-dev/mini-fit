@@ -21,6 +21,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 
+import { logout } from "@/api/auth";
+
 const yujiBoku = Yuji_Boku({
   weight: "400",
   subsets: ["latin"],
@@ -43,16 +45,11 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:8000/logout/", {
-        method: "POST",
-        credentials: "include",
-      });
+      await logout();
 
-      if (response.ok) {
-        setUser(null);
-        router.push("/login");
-        router.refresh();
-      }
+      setUser(null);
+
+      router.push("/login");
     } catch (error) {
       console.error(error);
     }
@@ -144,34 +141,36 @@ export function Sidebar() {
           )}
         </Link>
 
-        {/* Account */}
-        <Link
-          href="/account"
-          className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
-            collapsed ? "justify-center px-0" : "gap-4 px-4"
-          }`}
-        >
-          <User className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
-
-          <span
-            className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-              collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
-            }`}
-          >
-            {language === "en" ? "Account" : "Conta"}
-          </span>
-
-          {collapsed && (
-            <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-              {language === "en" ? "Account" : "Conta"}
-            </div>
-          )}
-        </Link>
-
         {user ? (
-          <Button className="mt-2 cursor-pointer" onClick={handleLogout}>
-            Logout
-          </Button>
+          <>
+            {/* Account */}
+            <Link
+              href="/account"
+              className={`group relative flex items-center rounded-xl py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black ${
+                collapsed ? "justify-center px-0" : "gap-4 px-4"
+              }`}
+            >
+              <User className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+
+              <span
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
+                  collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
+                }`}
+              >
+                {language === "en" ? "Account" : "Conta"}
+              </span>
+
+              {collapsed && (
+                <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
+                  {language === "en" ? "Account" : "Conta"}
+                </div>
+              )}
+            </Link>
+
+            <Button className="mt-2 cursor-pointer" onClick={handleLogout}>
+              Logout
+            </Button>
+          </>
         ) : (
           <>
             {/* Login */}

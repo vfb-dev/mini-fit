@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/store/authStore";
 
+import { login, getUser } from "@/api/auth";
+
 export default function LoginPage() {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
@@ -25,32 +27,12 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/api/token/", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      await login(email, password);
 
-      if (response.ok) {
-        const meResponse = await fetch("http://localhost:8000/me/", {
-          credentials: "include",
-        });
+      const user = await getUser();
+      setUser(user);
 
-        const user = await meResponse.json();
-
-        setUser(user);
-
-        router.refresh();
-        router.push("/");
-      } else {
-        alert("Invalid credentials");
-      }
+      router.push("/");
     } catch (error) {
       console.error(error);
     }
