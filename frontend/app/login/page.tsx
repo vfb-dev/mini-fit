@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 import { useState } from "react";
 
@@ -22,6 +22,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -83,11 +84,23 @@ export default function LoginPage() {
 
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="********"
-                className="pl-10 h-11 rounded-xl"
+                className="pl-10 pr-10 h-11 rounded-xl"
                 onChange={(e) => setPassword(e.target.value)}
               />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              >
+                {showPassword ? (
+                  <EyeOff className="size-5 cursor-pointer" />
+                ) : (
+                  <Eye className="size-5 cursor-pointer" />
+                )}
+              </button>
             </div>
           </div>
 
