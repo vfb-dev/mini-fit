@@ -1,7 +1,9 @@
-const API_URL = "http://127.0.0.1:8000/api/v1/exercises";
+const API_URL = "http://localhost:8000/api/v1/exercises";
 
 export async function get_unique_exercises() {
-  const response = await fetch(`${API_URL}/unique_exercises`);
+  const response = await fetch(`${API_URL}/unique_exercises`, {
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("Failed to Fetch");
@@ -21,7 +23,9 @@ export async function get_chart_data(params: {
     period: params.period,
   });
 
-  const response = await fetch(`${API_URL}/chart/?${searchParams}`);
+  const response = await fetch(`${API_URL}/chart/?${searchParams}`, {
+    credentials: "include",
+  });
 
   return response.json();
 }

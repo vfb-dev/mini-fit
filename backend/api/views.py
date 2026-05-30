@@ -22,6 +22,7 @@ class ExerciseViewset(viewsets.ModelViewSet):
     queryset = Exercise.objects.all().order_by("-date")
     serializer_class = ExerciseSerializer
     pagination_class = ExercisePagination
+    permission_classes = [IsAuthenticated]
 
     @action(detail=False, methods=["get"])
     def unique_exercises(self, request):
@@ -238,6 +239,8 @@ class LoginView(TokenObtainPairView):
         return response
     
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def post(self, request):
         response = Response(
             {"success": True},

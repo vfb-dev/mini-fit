@@ -1,7 +1,9 @@
-const API_URL = "http://127.0.0.1:8000/api/v1/exercises/";
+const API_URL = "http://localhost:8000/api/v1/exercises/";
 
 export async function getExercises(page = 1) {
-  const response = await fetch(`${API_URL}?page=${page}`);
+  const response = await fetch(`${API_URL}?page=${page}`, {
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch");
@@ -18,6 +20,7 @@ export async function createExercise(exerciseData: {
 }) {
   const response = await fetch(API_URL, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -42,6 +45,7 @@ export async function updateExercise(
 ) {
   const response = await fetch(`${API_URL}${id}/`, {
     method: "PUT",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -54,6 +58,7 @@ export async function updateExercise(
 export async function deleteExercise(id: number) {
   const response = await fetch(`${API_URL}${id}/`, {
     method: "DELETE",
+    credentials: "include",
   });
 
   if (!response.ok) {
