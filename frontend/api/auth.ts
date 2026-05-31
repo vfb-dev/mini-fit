@@ -1,3 +1,5 @@
+import { apiFetch } from "./wrapper";
+
 const BASE_URL = "http://localhost:8000";
 
 export async function login(email: string, password: string) {
@@ -34,9 +36,7 @@ export async function logout() {
 }
 
 export async function getUser() {
-  const response = await fetch(`${BASE_URL}/me/`, {
-    credentials: "include",
-  });
+  const response = await apiFetch(`${BASE_URL}/me/`);
 
   if (!response.ok) {
     throw new Error("Failed to Fetch User");
@@ -52,7 +52,7 @@ export const refreshToken = async () => {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to Refresh token");
+    throw new Error("Failed to Refresh Token");
   }
 
   return response.json();

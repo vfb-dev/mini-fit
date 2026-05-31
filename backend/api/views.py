@@ -225,6 +225,7 @@ class LoginView(TokenObtainPairView):
                 httponly=True,
                 secure=True,  # True in production
                 samesite="Lax",
+                max_age=60 * 30,  # 30 minutes
             )
 
             res.set_cookie(
@@ -233,6 +234,7 @@ class LoginView(TokenObtainPairView):
                 httponly=True,
                 secure=True,  # True in production
                 samesite="Lax",
+                max_age=60 * 60 * 24 * 7,  # 7 days
             )
 
             return res
@@ -287,6 +289,7 @@ class RefreshView(APIView):
                 httponly=True,
                 secure=True,
                 samesite="Lax",
+                max_age=60 * 30,  # 30 minutes
             )
 
             return response

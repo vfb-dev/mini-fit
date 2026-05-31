@@ -1,12 +1,12 @@
+import { apiFetch } from "./wrapper";
+
 const API_URL = "http://localhost:8000/api/v1/exercises/";
 
 export async function getExercises(page = 1) {
-  const response = await fetch(`${API_URL}?page=${page}`, {
-    credentials: "include",
-  });
+  const response = await apiFetch(`${API_URL}?page=${page}`);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch");
+    throw new Error("Failed to Fetch Exercises");
   }
 
   return response.json();
@@ -18,9 +18,8 @@ export async function createExercise(exerciseData: {
   reps: number;
   weight: number;
 }) {
-  const response = await fetch(API_URL, {
+  const response = await apiFetch(API_URL, {
     method: "POST",
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -43,9 +42,8 @@ export async function updateExercise(
     weight: number;
   },
 ) {
-  const response = await fetch(`${API_URL}${id}/`, {
+  const response = await apiFetch(`${API_URL}${id}/`, {
     method: "PUT",
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -56,9 +54,8 @@ export async function updateExercise(
 }
 
 export async function deleteExercise(id: number) {
-  const response = await fetch(`${API_URL}${id}/`, {
+  const response = await apiFetch(`${API_URL}${id}/`, {
     method: "DELETE",
-    credentials: "include",
   });
 
   if (!response.ok) {
