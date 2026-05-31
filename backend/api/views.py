@@ -12,6 +12,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -222,7 +223,7 @@ class LoginView(TokenObtainPairView):
                 key="access_token",
                 value=access,
                 httponly=True,
-                secure=False,  # True in production
+                secure=True,  # True in production
                 samesite="Lax",
             )
 
@@ -230,7 +231,7 @@ class LoginView(TokenObtainPairView):
                 key="refresh_token",
                 value=refresh,
                 httponly=True,
-                secure=False,  # True in production
+                secure=True,  # True in production
                 samesite="Lax",
             )
 
@@ -239,8 +240,7 @@ class LoginView(TokenObtainPairView):
         return response
     
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
         response = Response(
             {"success": True},
@@ -262,3 +262,37 @@ class MeView(APIView):
             "email": request.user.email,
         })
 
+class RefreshView(APIView):
+
+    def post(self, request):
+        refresh_token = request.COOKIES.get("refresh_token")
+
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token not found."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        try:
+            refresh = RefreshToken(refresh_token)
+
+            response = Response(
+                {"detail": "Token refreshed successfully."},
+                status=status.HTTP_200_OK,
+            )
+
+            response.set_cookie(
+                key="access_token",
+                value=str(refresh.access_token),
+                httponly=True,
+                secure=True,
+                samesite="Lax",
+            )
+
+            return response
+
+        except Exception:
+            return Response(
+                {"detail": "Invalid or expired refresh token."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )

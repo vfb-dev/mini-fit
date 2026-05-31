@@ -1,7 +1,7 @@
 const BASE_URL = "http://localhost:8000";
 
 export async function login(email: string, password: string) {
-  const response = await fetch(`${BASE_URL}/api/token/`, {
+  const response = await fetch(`${BASE_URL}/login/`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -44,3 +44,16 @@ export async function getUser() {
 
   return response.json();
 }
+
+export const refreshToken = async () => {
+  const response = await fetch(`${BASE_URL}/refresh/`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to Refresh token");
+  }
+
+  return response.json();
+};
