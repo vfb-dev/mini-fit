@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Dumbbell } from "lucide-react";
 
 import { useState } from "react";
 
@@ -46,8 +46,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 pb-10">
       {/* Card */}
-      <div className="w-full md:w-90 bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
+      <div className="w-full md:w-md bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
         {/* Header */}
+        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-zinc-900 text-white">
+          <Dumbbell className="size-6" />
+        </div>
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-zinc-900">Welcome back</h1>
 
