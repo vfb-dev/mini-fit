@@ -7,9 +7,21 @@ import { Yuji_Boku } from "next/font/google";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 
-import { Menu, X, ChartColumn, User, LogIn, UserPlus } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChartColumn,
+  User,
+  LogIn,
+  UserPlus,
+  LogOut,
+} from "lucide-react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { useAuthStore } from "@/store/authStore";
+import { logout } from "@/services/auth";
 
 const yujiBoku = Yuji_Boku({
   weight: "400",
@@ -17,11 +29,31 @@ const yujiBoku = Yuji_Boku({
 });
 
 export function MobileMenu() {
+  const router = useRouter();
+  const { user, setUser, loading } = useAuthStore();
+
   const [open, setOpen] = useState(false);
   const [language, setLanguage] = useState<"en" | "pt">("en");
 
   const toggleLanguage = () => {
     setLanguage((prev) => (prev === "en" ? "pt" : "en"));
+  };
+
+  const closeMenu = () => {
+    setOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+
+      setUser(null);
+      setOpen(false);
+
+      router.push("/login");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -69,7 +101,7 @@ export function MobileMenu() {
             onClick={() => setOpen(false)}
             className="cursor-pointer absolute right-0 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border bg-white text-zinc-500 shadow-sm transition-all duration-300 hover:scale-110 hover:bg-zinc-100 hover:text-black"
           >
-            <X className="size-5 " />
+            <X className="size-5" />
           </button>
         </div>
 
@@ -91,6 +123,7 @@ export function MobileMenu() {
           {/* Workouts */}
           <Link
             href="/"
+            onClick={closeMenu}
             className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
           >
             <ChartColumn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
@@ -98,35 +131,54 @@ export function MobileMenu() {
             <span>{language === "en" ? "Workouts" : "Treinos"}</span>
           </Link>
 
-          {/* Account */}
-          <Link
-            href="/account"
-            className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
-          >
-            <User className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+          {loading ? null : user ? (
+            <>
+              {/* Account */}
+              <Link
+                href="/account"
+                onClick={closeMenu}
+                className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
+              >
+                <User className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-            <span>{language === "en" ? "Account" : "Conta"}</span>
-          </Link>
+                <span>{language === "en" ? "Account" : "Conta"}</span>
+              </Link>
 
-          {/* Login */}
-          <Link
-            href="/login"
-            className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
-          >
-            <LogIn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+              {/* Logout */}
+              <button
+                onClick={handleLogout}
+                className="group flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
+              >
+                <LogOut className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-            <span>{language === "en" ? "Login" : "Entrar"}</span>
-          </Link>
+                <span>{language === "en" ? "Logout" : "Sair"}</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Login */}
+              <Link
+                href="/login"
+                onClick={closeMenu}
+                className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
+              >
+                <LogIn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-          {/* Register */}
-          <Link
-            href="/register"
-            className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
-          >
-            <UserPlus className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                <span>{language === "en" ? "Login" : "Entrar"}</span>
+              </Link>
 
-            <span>{language === "en" ? "Register" : "Registrar"}</span>
-          </Link>
+              {/* Register */}
+              <Link
+                href="/register"
+                onClick={closeMenu}
+                className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
+              >
+                <UserPlus className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+
+                <span>{language === "en" ? "Register" : "Registrar"}</span>
+              </Link>
+            </>
+          )}
         </nav>
       </aside>
     </>

@@ -31,7 +31,7 @@ const yujiBoku = Yuji_Boku({
 
 export function Sidebar() {
   const router = useRouter();
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, loading } = useAuthStore();
 
   const [language, setLanguage] = useState<"en" | "pt">("en");
   const [collapsed, setCollapsed] = useState(false);
@@ -142,7 +142,7 @@ export function Sidebar() {
           )}
         </Link>
 
-        {user ? (
+        {loading ? null : user ? (
           <>
             {/* Account */}
             <Link
