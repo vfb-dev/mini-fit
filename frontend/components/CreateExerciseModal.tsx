@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { createExercise } from "@/api/exercises";
+import { createExercise } from "@/services/exercises";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { format } from "date-fns";

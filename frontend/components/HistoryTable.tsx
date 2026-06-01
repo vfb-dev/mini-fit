@@ -37,7 +37,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/modalStore";
-import { getExercises, deleteExercise } from "@/api/exercises";
+import { getExercises, deleteExercise } from "@/services/exercises";
 
 type Exercise = {
   id: number;

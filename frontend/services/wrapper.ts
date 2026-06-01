@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/store/authStore";
-import { refreshToken } from "@/api/auth";
+import { refreshToken } from "@/services/auth";
 
 export async function apiFetch(input: RequestInfo, init?: RequestInit) {
   let response = await fetch(input, {

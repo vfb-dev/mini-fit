@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/store/authStore";
 
-import { login, getUser } from "@/api/auth";
+import { login, getUser } from "@/services/auth";
 
 export default function LoginPage() {
   const router = useRouter();

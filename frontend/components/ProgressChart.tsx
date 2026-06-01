@@ -30,7 +30,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 
 import { useQuery } from "@tanstack/react-query";
-import { get_unique_exercises, get_chart_data } from "@/api/chart";
+import { get_unique_exercises, get_chart_data } from "@/services/chart";
 
 type ChartData = {
   label: string;

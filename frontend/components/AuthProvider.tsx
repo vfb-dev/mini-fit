@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 import { useAuthStore } from "@/store/authStore";
-import { getUser, refreshToken } from "@/api/auth";
+import { getUser, refreshToken } from "@/services/auth";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setUser, setLoading } = useAuthStore();

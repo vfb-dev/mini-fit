@@ -22,7 +22,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 
-import { logout } from "@/api/auth";
+import { logout } from "@/services/auth";
 
 const yujiBoku = Yuji_Boku({
   weight: "400",

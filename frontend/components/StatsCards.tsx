@@ -11,7 +11,7 @@ import {
 
 import { Flame, TrendingUp, Repeat, Dumbbell } from "lucide-react";
 
-import { getStatsCardsData } from "@/api/stats";
+import { getStatsCardsData } from "@/services/stats";
 
 type StatsCardsData = {
   streak: number;

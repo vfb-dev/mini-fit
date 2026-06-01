@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { updateExercise } from "@/api/exercises";
+import { updateExercise } from "@/services/exercises";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
