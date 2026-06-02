@@ -4,6 +4,8 @@ from .models import Exercise
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 User = get_user_model()
 
 class ExerciseSerializer(serializers.ModelSerializer):
@@ -51,3 +53,15 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data["username"],
             password=validated_data["password"],
         )
+    
+class LoginSerializer(TokenObtainPairSerializer):
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        if not self.user.is_verified:
+            raise serializers.ValidationError(
+                "Please verify your email first."
+            )
+
+        return data

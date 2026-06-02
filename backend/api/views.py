@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Exercise
-from .serializers import ExerciseSerializer, RegisterSerializer
+from .serializers import ExerciseSerializer, LoginSerializer, RegisterSerializer
 from .pagination import ExercisePagination
 
 from django.db.models import Sum, Max, Avg, F
@@ -17,6 +17,16 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 from rest_framework.permissions import IsAuthenticated
+
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.mail import send_mail
+
+from users.tokens import email_verification_token
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 # Create your views here.
 class ExerciseViewset(viewsets.ModelViewSet):
@@ -207,6 +217,8 @@ class ExerciseViewset(viewsets.ModelViewSet):
         return Response(data)
 
 class LoginView(TokenObtainPairView):
+    serializer_class = LoginSerializer
+    
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
 
@@ -307,14 +319,62 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+
+            uid = urlsafe_base64_encode(
+                force_bytes(user.pk)
+            )
+
+            token = email_verification_token.make_token(user)
+
+            verification_url = (
+                f"http://localhost:3000/verify-email/"
+                f"{uid}/{token}"
+            )
+
+            send_mail(
+                subject="Verify your account",
+                message=f"Click the link:\n{verification_url}",
+                from_email=None,
+                recipient_list=[user.email],
+            )
 
             return Response(
-                {"detail": "Account created successfully."},
+                {
+                    "detail": "Account created. Check your email."
+                },
                 status=status.HTTP_201_CREATED,
             )
 
         return Response(
             serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    
+class VerifyEmailView(APIView):
+    permission_classes = []
+
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+
+        except Exception:
+            return Response(
+                {"detail": "Invalid link"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if email_verification_token.check_token(user, token):
+            user.is_verified = True
+            user.save()
+
+            return Response(
+                {"detail": "Email verified"},
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(
+            {"detail": "Invalid token"},
             status=status.HTTP_400_BAD_REQUEST,
         )

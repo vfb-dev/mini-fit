@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from api.views import LoginView, LogoutView, MeView, RefreshView, RegisterView
+from api.views import LoginView, LogoutView, MeView, RefreshView, RegisterView, VerifyEmailView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,4 +31,5 @@ urlpatterns = [
     path("logout/", LogoutView.as_view()),
     path("me/", MeView.as_view()),
     path("refresh/", RefreshView.as_view()),
+    path("verify-email/<uidb64>/<token>/", VerifyEmailView.as_view()),
 ]
