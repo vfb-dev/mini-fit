@@ -21,12 +21,82 @@ from rest_framework.permissions import IsAuthenticated
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.core.mail import send_mail
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 
 from users.tokens import email_verification_token
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+def send_verification_email(user, verification_url):
+    app_name = settings.APP_NAME
+
+    subject = f"Confirm your {app_name} email"
+
+    text_body = (
+        f"Hi {user.username},\n\n"
+        f"Welcome to {app_name}. Please confirm this email address so you can sign in:\n\n"
+        f"{verification_url}\n\n"
+        "If you did not create this account, you can safely ignore this email.\n\n"
+        f"Thanks,\nThe {app_name} team"
+    )
+
+    html_body = f"""
+<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:0;background:#f6f7f9;font-family:Arial,sans-serif;color:#18181b;">
+    <div style="max-width:560px;margin:0 auto;padding:32px 20px;">
+      <div style="background:#ffffff;border:1px solid #e4e4e7;border-radius:8px;padding:28px;">
+        <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#18181b;">
+          Confirm your email
+        </h1>
+
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">
+          Hi {user.username},
+        </p>
+
+        <p style="margin:0 0 24px;font-size:15px;line-height:1.6;">
+          Welcome to {app_name}. Please confirm this email address so you can sign in.
+        </p>
+
+        <p style="margin:0 0 24px;">
+          <a href="{verification_url}" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;border-radius:6px;padding:12px 18px;font-size:15px;font-weight:600;">
+            Confirm email
+          </a>
+        </p>
+
+        <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#52525b;">
+          If the button does not work, paste this link into your browser:
+        </p>
+
+        <p style="margin:0 0 24px;font-size:13px;line-height:1.6;word-break:break-all;color:#52525b;">
+          {verification_url}
+        </p>
+
+        <p style="margin:0;font-size:13px;line-height:1.6;color:#71717a;">
+          If you did not create this account, you can safely ignore this email.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
+        reply_to=[settings.SUPPORT_EMAIL],
+        headers={
+            "Auto-Submitted": "auto-generated",
+            "X-Auto-Response-Suppress": "All",
+        },
+    )
+
+    email.attach_alternative(html_body, "text/html")
+    email.send(fail_silently=False)
 
 # Create your views here.
 class ExerciseViewset(viewsets.ModelViewSet):
@@ -327,17 +397,14 @@ class RegisterView(APIView):
 
             token = email_verification_token.make_token(user)
 
+            frontend_url = settings.FRONTEND_URL.rstrip("/")
+
             verification_url = (
-                f"http://localhost:3000/verify-email/"
+                f"{frontend_url}/verify-email/"
                 f"{uid}/{token}"
             )
 
-            send_mail(
-                subject="Verify your account",
-                message=f"Click the link:\n{verification_url}",
-                from_email=None,
-                recipient_list=[user.email],
-            )
+            send_verification_email(user, verification_url)
 
             return Response(
                 {
