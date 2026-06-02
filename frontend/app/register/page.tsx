@@ -11,6 +11,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { registerUser } from "@/services/auth";
 
 const registerSchema = z
   .object({
@@ -51,14 +52,15 @@ export default function RegisterPage() {
     setSubmitError("");
 
     try {
-      console.log(values);
-
-      // Later:
-      // await registerUser(values.username, values.email, values.password);
+      await registerUser(values.username, values.email, values.password);
 
       router.push("/login");
     } catch (error) {
-      setSubmitError("Could not create your account. Please try again.");
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Could not create your account. Please try again.",
+      );
       console.error(error);
     }
   };

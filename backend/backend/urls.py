@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from api.views import LoginView, LogoutView, MeView, RefreshView
+from api.views import LoginView, LogoutView, MeView, RefreshView, RegisterView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/v1/", include("api.urls")),
 
     # JWT
+    path("register/", RegisterView.as_view()),
     path("login/", LoginView.as_view()),
     path("logout/", LogoutView.as_view()),
     path("me/", MeView.as_view()),

@@ -57,3 +57,36 @@ export const refreshToken = async () => {
 
   return response.json();
 };
+
+export async function registerUser(
+  username: string,
+  email: string,
+  password: string,
+) {
+  const response = await fetch(`${BASE_URL}/register/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+    }),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      data?.email?.[0] ??
+      data?.username?.[0] ??
+      data?.password?.[0] ??
+      data?.detail ??
+      "Failed to create account";
+
+    throw new Error(message);
+  }
+
+  return data;
+}
