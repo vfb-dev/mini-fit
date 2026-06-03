@@ -6,6 +6,10 @@ from django.contrib.auth import get_user_model
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from django.contrib.auth.password_validation import validate_password
+from django.utils.http import urlsafe_base64_decode
+from users.tokens import password_reset_token
+
 User = get_user_model()
 
 class ExerciseSerializer(serializers.ModelSerializer):
@@ -65,3 +69,42 @@ class LoginSerializer(TokenObtainPairSerializer):
             )
 
         return data
+    
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    password = serializers.CharField(write_only=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError({
+                "confirm_password": "Passwords do not match."
+            })
+
+        try:
+            uid = urlsafe_base64_decode(attrs["uid"]).decode()
+            user = User.objects.get(pk=uid)
+        except Exception:
+            raise serializers.ValidationError({
+                "detail": "Invalid reset link."
+            })
+
+        if not password_reset_token.check_token(user, attrs["token"]):
+            raise serializers.ValidationError({
+                "detail": "Invalid or expired reset link."
+            })
+
+        validate_password(attrs["password"], user=user)
+
+        attrs["user"] = user
+        return attrs
+
+    def save(self):
+        user = self.validated_data["user"]
+        user.set_password(self.validated_data["password"])
+        user.save()
+        return user

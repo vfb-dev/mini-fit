@@ -3,7 +3,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Exercise
-from .serializers import ExerciseSerializer, LoginSerializer, RegisterSerializer
+from .serializers import (
+    ExerciseSerializer,
+    LoginSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    RegisterSerializer,
+)
 from .pagination import ExercisePagination
 
 from django.db.models import Sum, Max, Avg, F
@@ -24,7 +30,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
-from users.tokens import email_verification_token
+from users.tokens import email_verification_token, password_reset_token
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -98,7 +104,103 @@ def send_verification_email(user, verification_url):
     email.attach_alternative(html_body, "text/html")
     email.send(fail_silently=False)
 
-# Create your views here.
+def send_password_reset_email(user, reset_url):
+    app_name = settings.APP_NAME
+    subject = f"Reset your {app_name} password"
+
+    text_body = (
+        f"Hi {user.username},\n\n"
+        f"Use this link to reset your password:\n\n"
+        f"{reset_url}\n\n"
+        "If you did not request this, you can safely ignore this email.\n\n"
+        f"Thanks,\nThe {app_name} team"
+    )
+
+    html_body = f"""
+<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:0;background:#f6f7f9;font-family:Arial,sans-serif;color:#18181b;">
+    <div style="max-width:560px;margin:0 auto;padding:32px 20px;">
+      <div style="background:#ffffff;border:1px solid #e4e4e7;border-radius:8px;padding:28px;">
+        <h1 style="margin:0 0 16px;font-size:22px;">Reset your password</h1>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">Hi {user.username},</p>
+        <p style="margin:0 0 24px;font-size:15px;line-height:1.6;">
+          Click the button below to create a new password.
+        </p>
+        <p style="margin:0 0 24px;">
+          <a href="{reset_url}" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;border-radius:6px;padding:12px 18px;font-size:15px;font-weight:600;">
+            Reset password
+          </a>
+        </p>
+        <p style="margin:0 0 12px;font-size:13px;color:#52525b;">
+          If the button does not work, paste this link into your browser:
+        </p>
+        <p style="margin:0 0 24px;font-size:13px;word-break:break-all;color:#52525b;">
+          {reset_url}
+        </p>
+        <p style="margin:0;font-size:13px;color:#71717a;">
+          If you did not request this, you can safely ignore this email.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
+        reply_to=[settings.SUPPORT_EMAIL],
+        headers={
+            "Auto-Submitted": "auto-generated",
+            "X-Auto-Response-Suppress": "All",
+        },
+    )
+
+    email.attach_alternative(html_body, "text/html")
+    email.send(fail_silently=False)
+
+class PasswordResetRequestView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = password_reset_token.make_token(user)
+
+            frontend_url = settings.FRONTEND_URL.rstrip("/")
+            reset_url = f"{frontend_url}/reset-password/{uid}/{token}"
+
+            send_password_reset_email(user, reset_url)
+
+        return Response(
+            {"detail": "If an account exists for that email, a reset link has been sent."},
+            status=status.HTTP_200_OK,
+        )
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"detail": "Password reset successfully."},
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class ExerciseViewset(viewsets.ModelViewSet):
     queryset = Exercise.objects.all().order_by("-date")
     serializer_class = ExerciseSerializer
@@ -336,7 +438,6 @@ class LogoutView(APIView):
 
         return response
     
-
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 

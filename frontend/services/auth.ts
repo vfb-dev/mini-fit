@@ -90,3 +90,55 @@ export async function registerUser(
 
   return data;
 }
+
+export async function requestPasswordReset(email: string) {
+  const response = await fetch(`${BASE_URL}/password-reset/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.detail ?? "Could not send password reset email.");
+  }
+
+  return data;
+}
+
+export async function confirmPasswordReset(
+  uid: string,
+  token: string,
+  password: string,
+  confirmPassword: string,
+) {
+  const response = await fetch(`${BASE_URL}/password-reset-confirm/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      uid,
+      token,
+      password,
+      confirm_password: confirmPassword,
+    }),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      data?.password?.[0] ??
+      data?.confirm_password?.[0] ??
+      data?.detail ??
+      "Could not reset password.";
+
+    throw new Error(message);
+  }
+
+  return data;
+}
