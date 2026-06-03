@@ -54,7 +54,7 @@ export default function RegisterPage() {
     try {
       await registerUser(values.username, values.email, values.password);
 
-      router.push("/login");
+      router.push(`/check-email?email=${encodeURIComponent(values.email)}`);
     } catch (error) {
       setSubmitError(
         error instanceof Error
