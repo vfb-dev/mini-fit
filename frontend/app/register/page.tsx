@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dumbbell, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { UserPlus, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -69,8 +69,8 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full md:w-md bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-zinc-900 text-white">
-            <Dumbbell className="size-6" />
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900">
+            <UserPlus className="size-6" />
           </div>
 
           <h1 className="text-2xl font-bold text-zinc-900">
