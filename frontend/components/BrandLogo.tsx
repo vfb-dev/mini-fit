@@ -18,7 +18,7 @@ export function BrandLogo({
         className={`
           flex h-12 w-12 shrink-0 items-center justify-center
           rounded-2xl
-          bg-gradient-to-br from-black to-zinc-700
+          bg-linear-to-br from-black to-zinc-700
           text-lg font-black text-white
           shadow-lg
           transition-all duration-500
@@ -34,7 +34,7 @@ export function BrandLogo({
       <div
         className={`
           overflow-hidden transition-all duration-500
-          ${collapsed ? "max-w-0 opacity-0" : "max-w-[140px] opacity-100"}
+          ${collapsed ? "max-w-0 opacity-0" : "max-w-35 opacity-100"}
         `}
       >
         <h1
