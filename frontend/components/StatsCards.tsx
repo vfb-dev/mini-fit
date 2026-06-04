@@ -55,7 +55,7 @@ export function StatsCards() {
     <>
       {isMobile ? (
         <Carousel>
-          <CarouselContent className="-ml-2 mr-1">
+          <CarouselContent className="-ml-1 mr-1 py-1">
             {cards.map((card, index) => {
               const Icon = card.icon;
 
