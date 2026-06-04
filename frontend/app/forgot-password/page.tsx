@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <section className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-zinc-900">Forgot Password ?</h1>
+        <h1 className="text-2xl font-bold text-zinc-900">Forgot password ?</h1>
         <p className="mt-1 text-sm text-zinc-500">
           Enter your email and we will send you a reset link.
         </p>
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
             disabled={isSubmitting}
             className="cursor-pointer mt-6 h-11 rounded-xl text-base font-medium"
           >
-            {isSubmitting ? "Sending..." : "Send Reset Link"}
+            {isSubmitting ? "Sending..." : "Send reset link"}
           </Button>
         </form>
 

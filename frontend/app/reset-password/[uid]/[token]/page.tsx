@@ -49,7 +49,7 @@ export default function ResetPasswordPage() {
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <section className="w-full md:w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl">
         <h1 className="text-2xl font-bold text-zinc-900">
-          Create New Password
+          Create new password
         </h1>
         <p className="mt-1 text-sm text-zinc-500">
           Choose a new password for your account.
@@ -121,7 +121,7 @@ export default function ResetPasswordPage() {
             disabled={isSubmitting}
             className="cursor-pointer mt-6 h-11 rounded-xl text-base font-medium"
           >
-            {isSubmitting ? "Resetting..." : "Reset Password"}
+            {isSubmitting ? "Resetting..." : "Reset password"}
           </Button>
         </form>
 
