@@ -4,7 +4,10 @@ import { create } from "zustand";
 
 interface User {
   id: number;
+  username: string;
   email: string;
+  is_verified: boolean;
+  date_joined: string;
 }
 
 interface AuthStore {

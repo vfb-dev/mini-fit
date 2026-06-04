@@ -444,7 +444,10 @@ class MeView(APIView):
     def get(self, request):
         return Response({
             "id": request.user.id,
+            "username": request.user.username,
             "email": request.user.email,
+            "is_verified": request.user.is_verified,
+            "date_joined": request.user.date_joined,
         })
 
 class RefreshView(APIView):
