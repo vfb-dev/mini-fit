@@ -5,8 +5,6 @@ import { useState } from "react";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 
-import { Yuji_Boku } from "next/font/google";
-
 import {
   ChartColumn,
   User,
@@ -24,10 +22,7 @@ import { useAuthStore } from "@/store/authStore";
 
 import { logout } from "@/services/auth";
 
-const yujiBoku = Yuji_Boku({
-  weight: "400",
-  subsets: ["latin"],
-});
+import { BrandLogo } from "./BrandLogo";
 
 export function Sidebar() {
   const router = useRouter();
@@ -64,15 +59,7 @@ export function Sidebar() {
     >
       {/* Top */}
       <div className="relative flex items-center justify-center">
-        <h1
-          className={`${yujiBoku.className} my-10 text-5xl transition-all duration-500 ease-in-out ${
-            collapsed
-              ? "scale-90 rotate-6 opacity-80"
-              : "scale-100 rotate-0 opacity-100"
-          }`}
-        >
-          道
-        </h1>
+        <BrandLogo collapsed={collapsed} className="my-10" />
 
         {/* Expand / Collapse Button */}
         <button

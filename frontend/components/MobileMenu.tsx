@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 
-import { Yuji_Boku } from "next/font/google";
-
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
+import { BrandLogo } from "./BrandLogo";
 
 import {
   Menu,
@@ -22,11 +21,6 @@ import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/store/authStore";
 import { logout } from "@/services/auth";
-
-const yujiBoku = Yuji_Boku({
-  weight: "400",
-  subsets: ["latin"],
-});
 
 export function MobileMenu() {
   const router = useRouter();
@@ -60,7 +54,7 @@ export function MobileMenu() {
     <>
       {/* Topbar */}
       <header className="sticky top-0 z-50 flex items-center justify-between px-6 pt-4 md:hidden">
-        <h1 className={`${yujiBoku.className} text-4xl`}>道</h1>
+        <BrandLogo className="scale-75 origin-left" />
 
         <Button
           variant="ghost"
@@ -94,15 +88,7 @@ export function MobileMenu() {
       >
         {/* Top */}
         <div className="relative flex items-center justify-center">
-          <h1 className={`${yujiBoku.className} my-10 text-5xl`}>道</h1>
-
-          {/* Close Button */}
-          <button
-            onClick={() => setOpen(false)}
-            className="cursor-pointer absolute right-0 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border bg-white text-zinc-500 shadow-sm transition-all duration-300 hover:scale-110 hover:bg-zinc-100 hover:text-black"
-          >
-            <X className="size-5" />
-          </button>
+          <BrandLogo className="my-10" />
         </div>
 
         <Separator />
