@@ -202,14 +202,19 @@ class PasswordResetConfirmView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ExerciseViewset(viewsets.ModelViewSet):
-    queryset = Exercise.objects.all().order_by("-date")
     serializer_class = ExerciseSerializer
     pagination_class = ExercisePagination
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Exercise.objects.filter(user=self.request.user).order_by("-date")
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     @action(detail=False, methods=["get"])
     def unique_exercises(self, request):
-        exercises = (Exercise.objects.values_list("name", flat=True).distinct().order_by("name"))
+        exercises = (self.get_queryset().values_list("name", flat=True).distinct().order_by("name"))
 
         return Response(exercises)
     
@@ -219,7 +224,7 @@ class ExerciseViewset(viewsets.ModelViewSet):
         metric = request.query_params.get("metric", "volume")
         period  = request.query_params.get("period", "30D")
 
-        queryset = Exercise.objects.all()
+        queryset = self.get_queryset()
 
         # filter exercise
         if exercise:
@@ -271,7 +276,7 @@ class ExerciseViewset(viewsets.ModelViewSet):
     
     @action(detail=False, methods=["get"])
     def stats_cards(self, request):
-        queryset = Exercise.objects.all()
+        queryset = self.get_queryset()
 
         # 🔥 Streak
         workout_days = list(
