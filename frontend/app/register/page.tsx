@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerUser } from "@/services/auth";
 
+import { PublicOnlyRoute } from "@/components/PublicOnlyRoute";
+
 const registerSchema = z
   .object({
     username: z.string().min(2, "Username must be at least 2 characters."),
@@ -66,156 +68,162 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full md:w-md bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900">
-            <UserPlus className="size-6" />
+    <PublicOnlyRoute>
+      <div className="min-h-screen flex items-center justify-center px-4 py-10">
+        <div className="w-full md:w-md bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900">
+              <UserPlus className="size-6" />
+            </div>
+
+            <h1 className="text-2xl font-bold text-zinc-900">
+              Create your account
+            </h1>
+
+            <p className="text-sm text-zinc-500 mt-1">
+              Start tracking your workouts today
+            </p>
           </div>
 
-          <h1 className="text-2xl font-bold text-zinc-900">
-            Create your account
-          </h1>
+          <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
 
-          <p className="text-sm text-zinc-500 mt-1">
-            Start tracking your workouts today
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="victor"
+                  className="pl-10 h-11 rounded-xl"
+                  {...register("username")}
+                />
+              </div>
+
+              {errors.username && (
+                <p className="text-sm text-red-500">
+                  {errors.username.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="email">Email</Label>
+
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="example@gmail.com"
+                  className="pl-10 h-11 rounded-xl"
+                  {...register("email")}
+                />
+              </div>
+
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="password">Password</Label>
+
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="********"
+                  className="pl-10 pr-10 h-11 rounded-xl"
+                  {...register("password")}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-5 cursor-pointer" />
+                  ) : (
+                    <Eye className="size-5 cursor-pointer" />
+                  )}
+                </button>
+              </div>
+
+              {errors.password && (
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="confirmPassword">Confirm password</Label>
+
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="********"
+                  className="pl-10 pr-10 h-11 rounded-xl"
+                  {...register("confirmPassword")}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((value) => !value)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="size-5 cursor-pointer" />
+                  ) : (
+                    <Eye className="size-5 cursor-pointer" />
+                  )}
+                </button>
+              </div>
+
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+
+            {submitError && (
+              <p className="mt-4 text-sm text-red-500">{submitError}</p>
+            )}
+
+            <Button
+              type="submit"
+              className="h-11 mt-6 rounded-xl cursor-pointer text-base font-medium"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating account..." : "Create account"}
+            </Button>
+          </form>
+
+          <p className="text-sm text-center text-zinc-500 mt-4">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-black hover:underline"
+            >
+              Login
+            </Link>
           </p>
         </div>
-
-        <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-
-              <Input
-                id="username"
-                type="text"
-                placeholder="victor"
-                className="pl-10 h-11 rounded-xl"
-                {...register("username")}
-              />
-            </div>
-
-            {errors.username && (
-              <p className="text-sm text-red-500">{errors.username.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2 mt-4">
-            <Label htmlFor="email">Email</Label>
-
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-
-              <Input
-                id="email"
-                type="email"
-                placeholder="example@gmail.com"
-                className="pl-10 h-11 rounded-xl"
-                {...register("email")}
-              />
-            </div>
-
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2 mt-4">
-            <Label htmlFor="password">Password</Label>
-
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="********"
-                className="pl-10 pr-10 h-11 rounded-xl"
-                {...register("password")}
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowPassword((value) => !value)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? (
-                  <EyeOff className="size-5 cursor-pointer" />
-                ) : (
-                  <Eye className="size-5 cursor-pointer" />
-                )}
-              </button>
-            </div>
-
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2 mt-4">
-            <Label htmlFor="confirmPassword">Confirm password</Label>
-
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-
-              <Input
-                id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="********"
-                className="pl-10 pr-10 h-11 rounded-xl"
-                {...register("confirmPassword")}
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((value) => !value)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-                aria-label={
-                  showConfirmPassword ? "Hide password" : "Show password"
-                }
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="size-5 cursor-pointer" />
-                ) : (
-                  <Eye className="size-5 cursor-pointer" />
-                )}
-              </button>
-            </div>
-
-            {errors.confirmPassword && (
-              <p className="text-sm text-red-500">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
-
-          {submitError && (
-            <p className="mt-4 text-sm text-red-500">{submitError}</p>
-          )}
-
-          <Button
-            type="submit"
-            className="h-11 mt-6 rounded-xl cursor-pointer text-base font-medium"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Creating account..." : "Create account"}
-          </Button>
-        </form>
-
-        <p className="text-sm text-center text-zinc-500 mt-4">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-black hover:underline"
-          >
-            Login
-          </Link>
-        </p>
       </div>
-    </div>
+    </PublicOnlyRoute>
   );
 }
