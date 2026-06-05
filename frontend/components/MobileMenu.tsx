@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { BrandLogo } from "./BrandLogo";
+import { FlagIcon } from "./FlagIcon";
 
 import {
   Menu,
@@ -99,7 +100,8 @@ export function MobileMenu() {
             onClick={toggleLanguage}
             className="w-full cursor-pointer rounded-xl transition-all duration-300"
           >
-            {t.nav.flag} {t.nav.country}
+            <FlagIcon language={language} />
+            <span>{t.nav.country}</span>
           </Button>
         </div>
 
@@ -169,4 +171,3 @@ export function MobileMenu() {
     </>
   );
 }
-

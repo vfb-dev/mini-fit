@@ -23,6 +23,7 @@ import { useAuthStore } from "@/store/authStore";
 import { logout } from "@/services/auth";
 
 import { BrandLogo } from "./BrandLogo";
+import { FlagIcon } from "./FlagIcon";
 
 import { useLanguageStore } from "@/store/languageStore";
 import { translations } from "@/lib/translations";
@@ -92,7 +93,7 @@ export function Sidebar() {
             collapsed ? "flex w-12 justify-center px-0" : "w-full"
           }`}
         >
-          {t.nav.flag}
+          <FlagIcon language={language} />
 
           <span
             className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${

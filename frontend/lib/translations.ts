@@ -1,4 +1,4 @@
-﻿// lib/translations.ts
+// lib/translations.ts
 export const translations = {
   en: {
     brand: {
@@ -11,7 +11,6 @@ export const translations = {
       login: "Login",
       register: "Register",
       country: "USA",
-      flag: "\u{1F1FA}\u{1F1F8}",
     },
     common: {
       email: "Email",
@@ -176,7 +175,6 @@ export const translations = {
       login: "Entrar",
       register: "Registrar",
       country: "Brasil",
-      flag: "\u{1F1E7}\u{1F1F7}",
     },
     common: {
       email: "Email",
