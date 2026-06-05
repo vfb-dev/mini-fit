@@ -24,16 +24,17 @@ import { logout } from "@/services/auth";
 
 import { BrandLogo } from "./BrandLogo";
 
+import { useLanguageStore } from "@/store/languageStore";
+import { translations } from "@/lib/translations";
+
 export function Sidebar() {
+  const { language, toggleLanguage } = useLanguageStore();
+  const t = translations[language];
+
   const router = useRouter();
   const { user, setUser, loading } = useAuthStore();
 
-  const [language, setLanguage] = useState<"en" | "pt">("en");
   const [collapsed, setCollapsed] = useState(false);
-
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "en" ? "pt" : "en"));
-  };
 
   const toggleSidebar = () => {
     setCollapsed((prev) => !prev);
@@ -91,14 +92,14 @@ export function Sidebar() {
             collapsed ? "flex w-12 justify-center px-0" : "w-full"
           }`}
         >
-          {language === "en" ? "🇺🇸" : "🇧🇷"}
+          {t.nav.flag}
 
           <span
             className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
               collapsed ? "ml-0 max-w-0 opacity-0" : "ml-2 max-w-20 opacity-100"
             }`}
           >
-            {language === "en" ? "USA" : "Brasil"}
+            {t.nav.country}
           </span>
         </Button>
       </div>
@@ -119,12 +120,12 @@ export function Sidebar() {
               collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
             }`}
           >
-            {language === "en" ? "Workouts" : "Treinos"}
+            {t.nav.workouts}
           </span>
 
           {collapsed && (
             <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-              {language === "en" ? "Workouts" : "Treinos"}
+              {t.nav.workouts}
             </div>
           )}
         </Link>
@@ -145,12 +146,12 @@ export function Sidebar() {
                   collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
                 }`}
               >
-                {language === "en" ? "Account" : "Conta"}
+                {t.nav.account}
               </span>
 
               {collapsed && (
                 <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-                  {language === "en" ? "Account" : "Conta"}
+                  {t.nav.account}
                 </div>
               )}
             </Link>
@@ -168,12 +169,12 @@ export function Sidebar() {
                   collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
                 }`}
               >
-                {language === "en" ? "Logout" : "Sair"}
+                {t.nav.logout}
               </span>
 
               {collapsed && (
                 <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-                  {language === "en" ? "Logout" : "Sair"}
+                  {t.nav.logout}
                 </div>
               )}
             </button>
@@ -194,12 +195,12 @@ export function Sidebar() {
                   collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
                 }`}
               >
-                {language === "en" ? "Login" : "Entrar"}
+                {t.nav.login}
               </span>
 
               {collapsed && (
                 <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-                  {language === "en" ? "Login" : "Entrar"}
+                  {t.nav.login}
                 </div>
               )}
             </Link>
@@ -218,12 +219,12 @@ export function Sidebar() {
                   collapsed ? "max-w-0 opacity-0" : "max-w-20 opacity-100"
                 }`}
               >
-                {language === "en" ? "Register" : "Registrar"}
+                {t.nav.register}
               </span>
 
               {collapsed && (
                 <div className="pointer-events-none absolute left-18 rounded-md bg-white px-4 py-2 text-sm opacity-0 shadow-md transition-all duration-200 group-hover:left-20 group-hover:opacity-100">
-                  {language === "en" ? "Register" : "Registrar"}
+                  {t.nav.register}
                 </div>
               )}
             </Link>

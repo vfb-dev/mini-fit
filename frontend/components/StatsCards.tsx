@@ -12,6 +12,8 @@ import {
 import { Flame, TrendingUp, Repeat, Dumbbell } from "lucide-react";
 
 import { getStatsCardsData } from "@/services/stats";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
 type StatsCardsData = {
   streak: number;
@@ -22,6 +24,8 @@ type StatsCardsData = {
 
 export function StatsCards() {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { language } = useLanguageStore();
+  const t = translations[language].dashboard.stats;
 
   const { data: statsCardsData } = useQuery<StatsCardsData>({
     queryKey: ["stats_cards"],
@@ -30,22 +34,22 @@ export function StatsCards() {
 
   const cards = [
     {
-      title: "Streak",
+      title: t.streak,
       value: statsCardsData?.streak ?? 0,
       icon: Flame,
     },
     {
-      title: "Volume Progress",
+      title: t.volumeProgress,
       value: `${statsCardsData?.avg_weekly_volume_progress ?? 0}%`,
       icon: TrendingUp,
     },
     {
-      title: "Reps Progress",
+      title: t.repsProgress,
       value: `${statsCardsData?.avg_weekly_reps_progress ?? 0}%`,
       icon: Repeat,
     },
     {
-      title: "Weight Progress",
+      title: t.weightProgress,
       value: `${statsCardsData?.avg_weekly_weight_progress ?? 0}%`,
       icon: Dumbbell,
     },

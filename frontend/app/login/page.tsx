@@ -17,10 +17,14 @@ import { useAuthStore } from "@/store/authStore";
 import { login, getUser } from "@/services/auth";
 
 import { PublicOnlyRoute } from "@/components/PublicOnlyRoute";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function LoginPage() {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
+  const { language } = useLanguageStore();
+  const t = translations[language];
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +44,7 @@ export default function LoginPage() {
 
       router.push("/");
     } catch (error) {
-      setError("Invalid email or password.");
+      setError(t.loginPage.invalidCredentials);
       console.error(error);
     }
   };
@@ -55,10 +59,12 @@ export default function LoginPage() {
             <LogIn className="size-6" />
           </div>
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-zinc-900">Welcome back</h1>
+            <h1 className="text-2xl font-bold text-zinc-900">
+              {t.loginPage.title}
+            </h1>
 
             <p className="text-sm text-zinc-500 mt-1">
-              Login to continue your journey
+              {t.loginPage.subtitle}
             </p>
           </div>
 
@@ -66,7 +72,7 @@ export default function LoginPage() {
           <form className="flex flex-col" onSubmit={handleLogin}>
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t.common.email}</Label>
 
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
@@ -83,7 +89,7 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="space-y-2 mt-4">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t.common.password}</Label>
 
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
@@ -115,7 +121,7 @@ export default function LoginPage() {
               href="/forgot-password"
               className="mt-1 mb-6 text-sm text-right text-zinc-500 hover:text-black transition"
             >
-              Forgot password?
+              {t.loginPage.forgotPassword}
             </Link>
 
             {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
@@ -125,18 +131,18 @@ export default function LoginPage() {
               type="submit"
               className="h-11 mt-2 rounded-xl cursor-pointer text-base font-medium"
             >
-              Login
+              {t.common.login}
             </Button>
           </form>
 
           {/* Footer */}
           <p className="text-sm text-center text-zinc-500 mt-4">
-            Don&apos;t have an account?{" "}
+            {t.loginPage.noAccount}{" "}
             <Link
               href="/register"
               className="font-medium text-black hover:underline"
             >
-              Sign up
+              {t.loginPage.signUp}
             </Link>
           </p>
         </div>

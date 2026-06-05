@@ -8,11 +8,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { translations } from "@/lib/translations";
 import { confirmPasswordReset } from "@/services/auth";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const params = useParams<{ uid: string; token: string }>();
+  const { language } = useLanguageStore();
+  const t = translations[language];
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,7 +42,7 @@ export default function ResetPasswordPage() {
       router.push("/login");
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "Could not reset password.",
+        error instanceof Error ? error.message : t.resetPasswordPage.resetError,
       );
     } finally {
       setIsSubmitting(false);
@@ -49,15 +53,15 @@ export default function ResetPasswordPage() {
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <section className="w-full md:w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl">
         <h1 className="text-2xl font-bold text-zinc-900">
-          Create new password
+          {t.resetPasswordPage.title}
         </h1>
         <p className="mt-1 text-sm text-zinc-500">
-          Choose a new password for your account.
+          {t.resetPasswordPage.subtitle}
         </p>
 
         <form className="mt-8 flex flex-col" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t.common.password}</Label>
 
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -86,7 +90,9 @@ export default function ResetPasswordPage() {
           </div>
 
           <div className="mt-4 space-y-2">
-            <Label htmlFor="confirmPassword">Confirm password</Label>
+            <Label htmlFor="confirmPassword">
+              {t.common.confirmPassword}
+            </Label>
 
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -121,17 +127,19 @@ export default function ResetPasswordPage() {
             disabled={isSubmitting}
             className="cursor-pointer mt-6 h-11 rounded-xl text-base font-medium"
           >
-            {isSubmitting ? "Resetting..." : "Reset password"}
+            {isSubmitting
+              ? t.resetPasswordPage.resetting
+              : t.resetPasswordPage.resetPassword}
           </Button>
         </form>
 
         <p className="mt-4 text-center text-sm text-zinc-500">
-          Back to{" "}
+          {t.resetPasswordPage.backTo}{" "}
           <Link
             href="/login"
             className="font-medium text-black hover:underline"
           >
-            login
+            {t.resetPasswordPage.loginLower}
           </Link>
         </p>
       </section>

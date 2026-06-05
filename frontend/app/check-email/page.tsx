@@ -5,10 +5,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function CheckEmailPage() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
+  const { language } = useLanguageStore();
+  const t = translations[language].checkEmailPage;
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
@@ -17,14 +21,15 @@ export default function CheckEmailPage() {
           <Mail className="size-8" />
         </div>
 
-        <h1 className="text-2xl font-bold text-zinc-900">Check your email</h1>
+        <h1 className="text-2xl font-bold text-zinc-900">{t.title}</h1>
 
         <p className="mt-3 text-sm leading-6 text-zinc-500">
-          We sent a verification link{email ? " to" : ""}
+          {t.sentLink}
+          {email ? ` ${t.to}` : ""}
           {email && (
             <span className="block font-medium text-zinc-900">{email}</span>
           )}
-          Open that link to activate your MiniFit account.
+          {t.activateAccount}
         </p>
 
         <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-left">
@@ -33,12 +38,11 @@ export default function CheckEmailPage() {
 
             <div>
               <p className="text-sm font-medium text-zinc-900">
-                Verification email sent
+                {t.emailSent}
               </p>
 
               <p className="mt-1 text-sm leading-5 text-zinc-500">
-                If it does not arrive in a few minutes, check your spam folder
-                or try registering again.
+                {t.spamHint}
               </p>
             </div>
           </div>
@@ -48,16 +52,16 @@ export default function CheckEmailPage() {
           asChild
           className="mt-6 h-11 w-full rounded-xl text-base font-medium"
         >
-          <Link href="/login">Go to login</Link>
+          <Link href="/login">{t.goToLogin}</Link>
         </Button>
 
         <p className="mt-4 text-sm text-zinc-500">
-          Used the wrong email?{" "}
+          {t.wrongEmail}{" "}
           <Link
             href="/register"
             className="font-medium text-black hover:underline"
           >
-            Create a new account
+            {t.createNewAccount}
           </Link>
         </p>
       </section>

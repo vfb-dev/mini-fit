@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlus, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -14,23 +14,36 @@ import { Label } from "@/components/ui/label";
 import { registerUser } from "@/services/auth";
 
 import { PublicOnlyRoute } from "@/components/PublicOnlyRoute";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
-const registerSchema = z
-  .object({
-    username: z.string().min(2, "Username must be at least 2 characters."),
-    email: z.email("Enter a valid email address."),
-    password: z.string().min(8, "Password must be at least 8 characters."),
-    confirmPassword: z.string().min(1, "Confirm your password."),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"],
-  });
+type RegisterValidationTranslations =
+  (typeof translations)[keyof typeof translations]["registerPage"]["validation"];
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+function createRegisterSchema(t: RegisterValidationTranslations) {
+  return z
+    .object({
+      username: z.string().min(2, t.usernameMin),
+      email: z.email(t.validEmail),
+      password: z.string().min(8, t.passwordMin),
+      confirmPassword: z.string().min(1, t.confirmPassword),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t.passwordsMatch,
+      path: ["confirmPassword"],
+    });
+}
+
+type RegisterFormValues = z.infer<ReturnType<typeof createRegisterSchema>>;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { language } = useLanguageStore();
+  const t = translations[language];
+  const registerSchema = useMemo(
+    () => createRegisterSchema(t.registerPage.validation),
+    [t.registerPage.validation],
+  );
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -61,7 +74,7 @@ export default function RegisterPage() {
       setSubmitError(
         error instanceof Error
           ? error.message
-          : "Could not create your account. Please try again.",
+          : t.registerPage.createAccountError,
       );
       console.error(error);
     }
@@ -77,17 +90,17 @@ export default function RegisterPage() {
             </div>
 
             <h1 className="text-2xl font-bold text-zinc-900">
-              Create your account
+              {t.registerPage.title}
             </h1>
 
             <p className="text-sm text-zinc-500 mt-1">
-              Start tracking your workouts today
+              {t.registerPage.subtitle}
             </p>
           </div>
 
           <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t.common.username}</Label>
 
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
@@ -109,7 +122,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t.common.email}</Label>
 
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
@@ -129,7 +142,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t.common.password}</Label>
 
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
@@ -146,7 +159,9 @@ export default function RegisterPage() {
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword ? t.common.hidePassword : t.common.showPassword
+                  }
                 >
                   {showPassword ? (
                     <EyeOff className="size-5 cursor-pointer" />
@@ -164,7 +179,9 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">
+                {t.common.confirmPassword}
+              </Label>
 
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
@@ -182,7 +199,9 @@ export default function RegisterPage() {
                   onClick={() => setShowConfirmPassword((value) => !value)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
                   aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
+                    showConfirmPassword
+                      ? t.common.hidePassword
+                      : t.common.showPassword
                   }
                 >
                   {showConfirmPassword ? (
@@ -209,17 +228,19 @@ export default function RegisterPage() {
               className="h-11 mt-6 rounded-xl cursor-pointer text-base font-medium"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creating account..." : "Create account"}
+              {isSubmitting
+                ? t.registerPage.creatingAccount
+                : t.registerPage.createAccount}
             </Button>
           </form>
 
           <p className="text-sm text-center text-zinc-500 mt-4">
-            Already have an account?{" "}
+            {t.registerPage.alreadyHaveAccount}{" "}
             <Link
               href="/login"
               className="font-medium text-black hover:underline"
             >
-              Login
+              {t.common.login}
             </Link>
           </p>
         </div>

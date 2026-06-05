@@ -1,3 +1,8 @@
+"use client";
+
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
+
 interface BrandLogoProps {
   collapsed?: boolean;
   className?: string;
@@ -7,6 +12,9 @@ export function BrandLogo({
   collapsed = false,
   className = "",
 }: BrandLogoProps) {
+  const { language } = useLanguageStore();
+  const t = translations[language];
+
   return (
     <div
       className={`group flex items-center transition-all duration-500 ${
@@ -54,7 +62,7 @@ export function BrandLogo({
             ${collapsed ? "-translate-x-4" : "translate-x-0"}
           `}
         >
-          Fitness Tracker
+          {t.brand.tagline}
         </p>
       </div>
     </div>

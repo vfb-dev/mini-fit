@@ -14,18 +14,24 @@ import {
 
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
+import { translations } from "@/lib/translations";
 import { useAuthStore } from "@/store/authStore";
+import { useLanguageStore, type Language } from "@/store/languageStore";
 
-function formatDate(value?: string) {
-  if (!value) return "Not available";
+function formatDate(
+  value: string | undefined,
+  language: Language,
+  fallback: string,
+) {
+  if (!value) return fallback;
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "Not available";
+    return fallback;
   }
 
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(language === "pt" ? "pt-BR" : "en", {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -47,6 +53,8 @@ function getInitials(username?: string, email?: string) {
 
 export default function AccountPage() {
   const { user } = useAuthStore();
+  const { language } = useLanguageStore();
+  const t = translations[language].accountPage;
 
   return (
     <ProtectedRoute>
@@ -73,10 +81,11 @@ export default function AccountPage() {
                     )}
                   </div>
 
-                  <p className="mt-2 text-zinc-500">Welcome back to MiniFit</p>
+                  <p className="mt-2 text-zinc-500">{t.welcome}</p>
 
                   <p className="mt-1 text-sm text-zinc-400">
-                    Member since {formatDate(user?.date_joined)}
+                    {t.memberSince}{" "}
+                    {formatDate(user?.date_joined, language, t.notAvailable)}
                   </p>
                 </div>
               </div>
@@ -88,20 +97,20 @@ export default function AccountPage() {
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           <InfoCard
             icon={<User className="size-4" />}
-            title="Username"
-            value={user?.username || "Not available"}
+            title={t.username}
+            value={user?.username || t.notAvailable}
           />
 
           <InfoCard
             icon={<Mail className="size-4" />}
-            title="Email"
-            value={user?.email || "Not available"}
+            title={t.email}
+            value={user?.email || t.notAvailable}
           />
 
           <InfoCard
             icon={<CalendarDays className="size-4" />}
-            title="Joined"
-            value={formatDate(user?.date_joined)}
+            title={t.joined}
+            value={formatDate(user?.date_joined, language, t.notAvailable)}
           />
         </div>
 
@@ -109,29 +118,31 @@ export default function AccountPage() {
         <div className="mt-8 rounded-3xl border bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-center gap-2">
             <Shield className="size-5 text-blue-600" />
-            <h2 className="text-lg font-semibold">Security</h2>
+            <h2 className="text-lg font-semibold">{t.security}</h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border bg-zinc-50 p-4">
-              <p className="mb-1 text-sm text-zinc-500">Email Verification</p>
+              <p className="mb-1 text-sm text-zinc-500">
+                {t.emailVerification}
+              </p>
 
               {user?.is_verified ? (
                 <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
-                  Verified
+                  {t.verified}
                 </span>
               ) : (
                 <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
-                  Pending Verification
+                  {t.pendingVerification}
                 </span>
               )}
             </div>
 
             <div className="rounded-2xl border bg-zinc-50 p-4">
-              <p className="mb-1 text-sm text-zinc-500">Password</p>
+              <p className="mb-1 text-sm text-zinc-500">{t.password}</p>
 
               <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                Protected
+                {t.protected}
               </span>
             </div>
           </div>
@@ -140,22 +151,22 @@ export default function AccountPage() {
         {/* Actions */}
         <div className="mt-8">
           <h2 className="mb-4 text-lg font-semibold text-zinc-950">
-            Account Actions
+            {t.accountActions}
           </h2>
 
           <div className="grid gap-4 md:grid-cols-2">
             <ActionCard
               href="/forgot-password"
               icon={<KeyRound className="size-5" />}
-              title="Reset Password"
-              description="Update your account password."
+              title={t.resetPassword}
+              description={t.resetPasswordDescription}
             />
 
             <ActionCard
               href="/"
               icon={<ArrowUpRight className="size-5" />}
-              title="Workout Dashboard"
-              description="Return to your workout overview."
+              title={t.workoutDashboard}
+              description={t.workoutDashboardDescription}
             />
           </div>
         </div>

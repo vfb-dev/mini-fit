@@ -31,6 +31,8 @@ import { Button } from "@/components/ui/button";
 
 import { useQuery } from "@tanstack/react-query";
 import { get_unique_exercises, get_chart_data } from "@/services/chart";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
 type ChartData = {
   label: string;
@@ -46,6 +48,8 @@ function toTitleCase(text: string) {
 
 export function ProgressChart() {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { language } = useLanguageStore();
+  const t = translations[language].dashboard.chart;
 
   const [exercise, setExercise] = useState<string>("");
   const [period, setPeriod] = useState<string>("30D");
@@ -95,11 +99,11 @@ export function ProgressChart() {
         </div>
 
         <h3 className="text-sm font-semibold text-zinc-900">
-          No progress data yet
+          {t.emptyTitle}
         </h3>
 
         <p className="mt-1 max-w-xs text-sm text-zinc-500">
-          Start logging workouts to visualize your training progress.
+          {t.emptyDescription}
         </p>
       </div>
     );
@@ -108,7 +112,7 @@ export function ProgressChart() {
   return (
     <>
       <div className="flex justify-between mb-4">
-        <h3 className="text-lg font-semibold">Progress</h3>
+        <h3 className="text-lg font-semibold">{t.progress}</h3>
         {/* Date Menu */}
         <div className="flex gap-2 md:gap-4">
           {isMobile ? (
@@ -119,20 +123,20 @@ export function ProgressChart() {
                   className="justify-between cursor-pointer"
                 >
                   <Calendar className="size-4 text-zinc-500" />
-                  {period}
+                  {period === "max" ? t.max : period}
                 </Button>
               </PopoverTrigger>
 
               <PopoverContent className="w-40 p-2" align="end">
                 <div className="flex flex-col gap-1">
-                  {["7D", "30D", "90D", "1Y", "Max"].map((value) => (
+                  {["7D", "30D", "90D", "1Y", "max"].map((value) => (
                     <Button
                       key={value}
                       variant={period === value ? "default" : "ghost"}
                       className="justify-start"
                       onClick={() => setPeriod(value)}
                     >
-                      {value === "max" ? "Max" : value}
+                      {value === "max" ? t.max : value}
                     </Button>
                   ))}
                 </div>
@@ -177,7 +181,7 @@ export function ProgressChart() {
                 value="max"
                 aria-label="Toggle max"
               >
-                Max
+                {t.max}
               </ToggleGroupItem>
             </ToggleGroup>
           )}
@@ -187,19 +191,19 @@ export function ProgressChart() {
             <PopoverTrigger asChild>
               <Button className="cursor-pointer" variant="secondary">
                 <SlidersHorizontal className="size-4" />
-                Filters
+                {t.filters}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-4" align="end">
               <PopoverHeader className="mb-4">
-                <PopoverTitle>Filters</PopoverTitle>
-                <PopoverDescription>Customize your chart.</PopoverDescription>
+                <PopoverTitle>{t.filters}</PopoverTitle>
+                <PopoverDescription>{t.customizeChart}</PopoverDescription>
               </PopoverHeader>
 
               <FieldGroup className="gap-4">
                 <Field orientation="horizontal">
                   <FieldLabel htmlFor="exercise" className="w-1/2">
-                    Exercise
+                    {t.exercise}
                   </FieldLabel>
                   <Select
                     value={selectedExercise}
@@ -221,7 +225,7 @@ export function ProgressChart() {
                 </Field>
                 <Field orientation="horizontal">
                   <FieldLabel htmlFor="metric" className="w-1/2">
-                    Metric
+                    {t.metric}
                   </FieldLabel>
 
                   <Select
@@ -233,9 +237,9 @@ export function ProgressChart() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="volume">Volume</SelectItem>
-                        <SelectItem value="weight">Weight</SelectItem>
-                        <SelectItem value="reps">Reps</SelectItem>
+                        <SelectItem value="volume">{t.volume}</SelectItem>
+                        <SelectItem value="weight">{t.weight}</SelectItem>
+                        <SelectItem value="reps">{t.reps}</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -364,9 +368,9 @@ export function ProgressChart() {
 
               {/* metric */}
               <p className="mt-1 text-xs text-zinc-500">
-                {metric === "volume" && "Training Volume"}
-                {metric === "weight" && "Max Weight"}
-                {metric === "reps" && "Total Reps"}
+                {metric === "volume" && t.trainingVolume}
+                {metric === "weight" && t.maxWeight}
+                {metric === "reps" && t.totalReps}
               </p>
 
               {/* exercise */}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -21,17 +21,16 @@ import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/store/authStore";
 import { logout } from "@/services/auth";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
 export function MobileMenu() {
   const router = useRouter();
   const { user, setUser, loading } = useAuthStore();
+  const { language, toggleLanguage } = useLanguageStore();
+  const t = translations[language];
 
   const [open, setOpen] = useState(false);
-  const [language, setLanguage] = useState<"en" | "pt">("en");
-
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "en" ? "pt" : "en"));
-  };
 
   const closeMenu = () => {
     setOpen(false);
@@ -100,7 +99,7 @@ export function MobileMenu() {
             onClick={toggleLanguage}
             className="w-full cursor-pointer rounded-xl transition-all duration-300"
           >
-            {language === "en" ? "🇺🇸 USA" : "🇧🇷 Brasil"}
+            {t.nav.flag} {t.nav.country}
           </Button>
         </div>
 
@@ -114,7 +113,7 @@ export function MobileMenu() {
           >
             <ChartColumn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-            <span>{language === "en" ? "Workouts" : "Treinos"}</span>
+            <span>{t.nav.workouts}</span>
           </Link>
 
           {loading ? null : user ? (
@@ -127,7 +126,7 @@ export function MobileMenu() {
               >
                 <User className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-                <span>{language === "en" ? "Account" : "Conta"}</span>
+                <span>{t.nav.account}</span>
               </Link>
 
               {/* Logout */}
@@ -137,7 +136,7 @@ export function MobileMenu() {
               >
                 <LogOut className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-                <span>{language === "en" ? "Logout" : "Sair"}</span>
+                <span>{t.nav.logout}</span>
               </button>
             </>
           ) : (
@@ -150,7 +149,7 @@ export function MobileMenu() {
               >
                 <LogIn className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-                <span>{language === "en" ? "Login" : "Entrar"}</span>
+                <span>{t.nav.login}</span>
               </Link>
 
               {/* Register */}
@@ -161,7 +160,7 @@ export function MobileMenu() {
               >
                 <UserPlus className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
 
-                <span>{language === "en" ? "Register" : "Registrar"}</span>
+                <span>{t.nav.register}</span>
               </Link>
             </>
           )}
@@ -170,3 +169,4 @@ export function MobileMenu() {
     </>
   );
 }
+

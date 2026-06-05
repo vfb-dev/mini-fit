@@ -17,23 +17,32 @@ import { createExercise } from "@/services/exercises";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { format } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
-const schema = z.object({
-  date: z.string().min(1, "Required"),
-  name: z.string().min(1, "Required"),
-  reps: z.number().min(1, "Minimum 1 rep"),
-  weight: z
-    .number()
-    .min(0, "Must be positive")
-    .max(9999, "Maximum weight is 9999"),
-});
+type Translation = (typeof translations)[keyof typeof translations];
 
-type FormData = z.infer<typeof schema>;
+function createExerciseSchema(t: Translation) {
+  return z.object({
+    date: z.string().min(1, t.common.required),
+    name: z.string().min(1, t.common.required),
+    reps: z.number().min(1, t.dashboard.exerciseModal.minimumOneRep),
+    weight: z
+      .number()
+      .min(0, t.dashboard.exerciseModal.mustBePositive)
+      .max(9999, t.dashboard.exerciseModal.maxWeight),
+  });
+}
+
+type FormData = z.infer<ReturnType<typeof createExerciseSchema>>;
 
 export function CreateExerciseModal() {
   const { createModal, handleCreateModal } = useModalStore();
   const queryClient = useQueryClient();
+  const { language } = useLanguageStore();
+  const t = translations[language];
+  const schema = useMemo(() => createExerciseSchema(t), [t]);
 
   const {
     register,
@@ -102,16 +111,16 @@ export function CreateExerciseModal() {
                 id="create-exercise-title"
                 className="text-xl font-semibold tracking-normal text-zinc-950"
               >
-                Register workout
+                {t.dashboard.exerciseModal.createTitle}
               </CardTitle>
               <p className="mt-1 text-sm leading-5 text-zinc-500">
-                Add exercise details to update your progress.
+                {t.dashboard.exerciseModal.createDescription}
               </p>
             </div>
 
             <button
               type="button"
-              aria-label="Close modal"
+              aria-label={t.dashboard.exerciseModal.closeModal}
               onClick={() => handleCreateModal(false)}
               className="cursor-pointer grid size-10 shrink-0 place-items-center rounded-full bg-white/80 text-zinc-500 shadow-sm ring-1 ring-zinc-200 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
@@ -128,7 +137,7 @@ export function CreateExerciseModal() {
                   htmlFor="date"
                   className="text-sm font-semibold text-zinc-800"
                 >
-                  Date
+                  {t.common.date}
                 </Label>
                 <div className="relative">
                   <CalendarClock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -151,7 +160,7 @@ export function CreateExerciseModal() {
                   htmlFor="exercise"
                   className="text-sm font-semibold text-zinc-800"
                 >
-                  Exercise
+                  {t.common.exercise}
                 </Label>
                 <div className="relative">
                   <Dumbbell className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -176,8 +185,8 @@ export function CreateExerciseModal() {
                     htmlFor="reps"
                     className="text-sm font-semibold text-zinc-800"
                   >
-                    Reps
-                  </Label>
+                  {t.common.reps}
+                </Label>
                   <div className="relative">
                     <Hash className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
                     <Input
@@ -200,7 +209,7 @@ export function CreateExerciseModal() {
                     htmlFor="weight"
                     className="text-sm font-semibold text-zinc-800"
                   >
-                    Weight
+                    {t.common.weight}
                   </Label>
                   <div className="relative">
                     <Scale className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -230,7 +239,7 @@ export function CreateExerciseModal() {
                 className="h-11 cursor-pointer rounded-xl px-5"
                 onClick={() => handleCreateModal(false)}
               >
-                Cancel
+                {t.common.cancel}
               </Button>
 
               <Button
@@ -241,7 +250,7 @@ export function CreateExerciseModal() {
                 {createMutation.isPending && (
                   <Loader2 className="mr-2 size-4 animate-spin" />
                 )}
-                Add Exercise
+                {t.dashboard.exerciseModal.addExercise}
               </Button>
             </div>
           </form>

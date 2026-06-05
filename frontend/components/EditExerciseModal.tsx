@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarClock, Dumbbell, Hash, Loader2, Scale, X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,18 +17,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { updateExercise } from "@/services/exercises";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
-const schema = z.object({
-  date: z.string().min(1, "Required"),
-  name: z.string().min(1, "Required"),
-  reps: z.number().min(1, "Minimum 1 rep"),
-  weight: z
-    .number()
-    .min(0, "Must be positive")
-    .max(9999, "Maximum weight is 9999"),
-});
+type Translation = (typeof translations)[keyof typeof translations];
 
-type FormData = z.infer<typeof schema>;
+function createExerciseSchema(t: Translation) {
+  return z.object({
+    date: z.string().min(1, t.common.required),
+    name: z.string().min(1, t.common.required),
+    reps: z.number().min(1, t.dashboard.exerciseModal.minimumOneRep),
+    weight: z
+      .number()
+      .min(0, t.dashboard.exerciseModal.mustBePositive)
+      .max(9999, t.dashboard.exerciseModal.maxWeight),
+  });
+}
+
+type FormData = z.infer<ReturnType<typeof createExerciseSchema>>;
 
 type Exercise = {
   id: number;
@@ -50,6 +56,9 @@ type UpdateExerciseData = {
 export function EditExerciseModal({ selectedExercise }: EditModalProps) {
   const { editModal, handleEditModal } = useModalStore();
   const queryClient = useQueryClient();
+  const { language } = useLanguageStore();
+  const t = translations[language];
+  const schema = useMemo(() => createExerciseSchema(t), [t]);
 
   const {
     register,
@@ -136,16 +145,16 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
                 id="edit-exercise-title"
                 className="text-xl font-semibold tracking-normal text-zinc-950"
               >
-                Edit workout
+                {t.dashboard.exerciseModal.editTitle}
               </CardTitle>
               <p className="mt-1 text-sm leading-5 text-zinc-500">
-                Update exercise details to keep your progress accurate.
+                {t.dashboard.exerciseModal.editDescription}
               </p>
             </div>
 
             <button
               type="button"
-              aria-label="Close modal"
+              aria-label={t.dashboard.exerciseModal.closeModal}
               onClick={() => handleEditModal(false)}
               className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full bg-white/80 text-zinc-500 shadow-sm ring-1 ring-zinc-200 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
@@ -162,7 +171,7 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
                   htmlFor="date"
                   className="text-sm font-semibold text-zinc-800"
                 >
-                  Date
+                  {t.common.date}
                 </Label>
                 <div className="relative">
                   <CalendarClock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -185,7 +194,7 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
                   htmlFor="exercise"
                   className="text-sm font-semibold text-zinc-800"
                 >
-                  Exercise
+                  {t.common.exercise}
                 </Label>
                 <div className="relative">
                   <Dumbbell className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -210,8 +219,8 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
                     htmlFor="reps"
                     className="text-sm font-semibold text-zinc-800"
                   >
-                    Reps
-                  </Label>
+                  {t.common.reps}
+                </Label>
                   <div className="relative">
                     <Hash className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
                     <Input
@@ -234,7 +243,7 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
                     htmlFor="weight"
                     className="text-sm font-semibold text-zinc-800"
                   >
-                    Weight
+                    {t.common.weight}
                   </Label>
                   <div className="relative">
                     <Scale className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
@@ -264,7 +273,7 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
                 className="h-11 cursor-pointer rounded-xl px-5"
                 onClick={() => handleEditModal(false)}
               >
-                Cancel
+                {t.common.cancel}
               </Button>
 
               <Button
@@ -275,7 +284,7 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
                 {updateMutation.isPending && (
                   <Loader2 className="mr-2 size-4 animate-spin" />
                 )}
-                Save Changes
+                {t.dashboard.exerciseModal.saveChanges}
               </Button>
             </div>
           </form>

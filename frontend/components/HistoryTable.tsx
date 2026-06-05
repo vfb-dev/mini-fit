@@ -38,6 +38,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/modalStore";
 import { getExercises, deleteExercise } from "@/services/exercises";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
 
 type Exercise = {
   id: number;
@@ -66,6 +68,8 @@ function toTitleCase(text: string) {
 export function HistoryTable() {
   const queryClient = useQueryClient();
   const { handleCreateModal, handleEditModal } = useModalStore();
+  const { language } = useLanguageStore();
+  const t = translations[language].dashboard.history;
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
@@ -117,7 +121,7 @@ export function HistoryTable() {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{t.loading}</div>;
   }
 
   return (
@@ -126,29 +130,29 @@ export function HistoryTable() {
       <EditExerciseModal selectedExercise={selectedExercise} />
 
       <div className="flex justify-between mb-4">
-        <h3 className="text-lg font-semibold">History</h3>
+        <h3 className="text-lg font-semibold">{t.title}</h3>
 
         <Button
           className="cursor-pointer gap-2"
           onClick={() => handleCreateModal(true)}
         >
           <NotebookPen className="size-4" />
-          New Entry
+          {t.newEntry}
         </Button>
       </div>
 
       <Table className="mb-4">
         <TableHeader>
           <TableRow>
-            <TableHead className="font-bold">Date</TableHead>
+            <TableHead className="font-bold">{t.date}</TableHead>
 
-            <TableHead className="font-bold">Exercise</TableHead>
+            <TableHead className="font-bold">{t.exercise}</TableHead>
 
-            <TableHead className="font-bold">Reps</TableHead>
+            <TableHead className="font-bold">{t.reps}</TableHead>
 
-            <TableHead className="font-bold">Weight</TableHead>
+            <TableHead className="font-bold">{t.weight}</TableHead>
 
-            <TableHead className="font-bold text-right">Actions</TableHead>
+            <TableHead className="font-bold text-right">{t.actions}</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -184,7 +188,7 @@ export function HistoryTable() {
                           handleEditModal(true);
                         }}
                       >
-                        Edit
+                        {t.edit}
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
@@ -194,7 +198,7 @@ export function HistoryTable() {
                         variant="destructive"
                         onClick={() => deleteMutation.mutate(exercise.id)}
                       >
-                        Delete
+                        {t.delete}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -207,7 +211,7 @@ export function HistoryTable() {
                 colSpan={5}
                 className="h-24 text-center text-muted-foreground"
               >
-                No exercises found.
+                {t.empty}
               </TableCell>
             </TableRow>
           )}
