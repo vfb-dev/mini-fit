@@ -137,7 +137,7 @@ export const translations = {
       },
       history: {
         title: "History",
-        newEntry: "New Entry",
+        newEntry: "New entry",
         date: "Date",
         exercise: "Exercise",
         reps: "Reps",
@@ -155,8 +155,8 @@ export const translations = {
         editDescription:
           "Update exercise details to keep your progress accurate.",
         closeModal: "Close modal",
-        addExercise: "Add Exercise",
-        saveChanges: "Save Changes",
+        addExercise: "Add exercise",
+        saveChanges: "Save changes",
         minimumOneRep: "Minimum 1 rep",
         mustBePositive: "Must be positive",
         maxWeight: "Maximum weight is 9999",
