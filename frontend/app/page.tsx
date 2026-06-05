@@ -2,6 +2,12 @@ import { HistoryTable } from "@/components/HistoryTable";
 import { ProgressChart } from "@/components/ProgressChart";
 import { StatsCards } from "@/components/StatsCards";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Workouts",
+  description: "Track your fitness progress",
+};
 
 export default function Home() {
   return (
