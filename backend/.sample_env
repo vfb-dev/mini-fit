@@ -1,8 +1,19 @@
-SECRET_KEY=
-DEBUG=
+SECRET_KEY=django-insecure-j8f4k2m9x7n1p5r3t6y8w0z4a1b7c9d2e5f6g8h0i
+DEBUG=True
 
 # Database configuration
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
+
+DB_NAME=minifit_db
+DB_USER=postgres
+DB_PASSWORD=postgres123
+DB_HOST=localhost
+
+# Email Configuration
+
+EMAIL_HOST_USER=noreply@minifit.com
+EMAIL_HOST_PASSWORD=your-app-password
+
+APP_NAME=MiniFit
+FRONTEND_URL=http://localhost:3000
+DEFAULT_FROM_EMAIL=MiniFit <noreply@minifit.com>
+SUPPORT_EMAIL=support@minifit.com
