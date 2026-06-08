@@ -1,9 +1,9 @@
 import { apiFetch } from "./wrapper";
 
-const BASE_URL = "http://localhost:8000";
+import { apiUrl } from "@/lib/api";
 
 export async function login(email: string, password: string) {
-  const response = await fetch(`${BASE_URL}/login/`, {
+  const response = await fetch(apiUrl("/login/"), {
     method: "POST",
     credentials: "include",
     headers: {
@@ -23,7 +23,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function logout() {
-  const response = await fetch(`${BASE_URL}/logout/`, {
+  const response = await fetch(apiUrl("/logout/"), {
     method: "POST",
     credentials: "include",
   });
@@ -36,7 +36,7 @@ export async function logout() {
 }
 
 export async function getUser() {
-  const response = await apiFetch(`${BASE_URL}/me/`);
+  const response = await apiFetch(apiUrl("/me/"));
 
   if (!response.ok) {
     throw new Error("Failed to Fetch User");
@@ -46,7 +46,7 @@ export async function getUser() {
 }
 
 export const refreshToken = async () => {
-  const response = await fetch(`${BASE_URL}/refresh/`, {
+  const response = await fetch(apiUrl("/refresh/"), {
     method: "POST",
     credentials: "include",
   });
@@ -63,7 +63,7 @@ export async function registerUser(
   email: string,
   password: string,
 ) {
-  const response = await fetch(`${BASE_URL}/register/`, {
+  const response = await fetch(apiUrl("/register/"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export async function registerUser(
 }
 
 export async function requestPasswordReset(email: string) {
-  const response = await fetch(`${BASE_URL}/password-reset/`, {
+  const response = await fetch(apiUrl("/password-reset/"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -115,7 +115,7 @@ export async function confirmPasswordReset(
   password: string,
   confirmPassword: string,
 ) {
-  const response = await fetch(`${BASE_URL}/password-reset-confirm/`, {
+  const response = await fetch(apiUrl("/password-reset-confirm/"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
