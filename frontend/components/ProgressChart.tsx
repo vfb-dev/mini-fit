@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersHorizontal, Dumbbell, Calendar } from "lucide-react";
+import { SlidersHorizontal, Dumbbell } from "lucide-react";
 
 import { ResponsiveBar } from "@nivo/bar";
 
@@ -34,6 +34,8 @@ import { get_unique_exercises, get_chart_data } from "@/services/chart";
 import { translations } from "@/lib/translations";
 import { useLanguageStore } from "@/store/languageStore";
 
+const PERIOD_OPTIONS = ["7D", "30D", "90D", "1Y", "max"];
+
 type ChartData = {
   label: string;
   tooltip_label: string;
@@ -44,6 +46,18 @@ function toTitleCase(text: string) {
   return text.replace(/\w\S*/g, (word) => {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   });
+}
+
+function formatChartNumber(value: number) {
+  if (value >= 1_000_000) {
+    return `${Number((value / 1_000_000).toFixed(1))}M`;
+  }
+
+  if (value >= 1_000) {
+    return `${Number((value / 1_000).toFixed(1))}k`;
+  }
+
+  return String(value);
 }
 
 export function ProgressChart() {
@@ -76,26 +90,38 @@ export function ProgressChart() {
   });
 
   const maxChartValue = Math.max(...chartData.map((item) => item.value), 0);
-  const chartMax = maxChartValue * (chartData.length <= 3 ? 1.25 : 1.15);
+  const chartMax =
+    maxChartValue > 0
+      ? maxChartValue * (chartData.length <= 3 ? 1.25 : 1.15)
+      : 1;
   const getBarPadding = (count: number) => {
-    if (count <= 1) return 0.9;
-    if (count <= 4) return 0.8;
-    return 0.6;
+    if (count <= 1) return isMobile ? 0.75 : 0.9;
+    if (count <= 4) return isMobile ? 0.55 : 0.8;
+    return isMobile ? 0.35 : 0.6;
   };
   const visibleTicks = chartData
     .filter((_, index) => {
+      if (isMobile) {
+        if (chartData.length <= 6) return true;
+        if (chartData.length <= 12) return index % 2 === 0;
+
+        return index % 4 === 0;
+      }
+
       if (chartData.length <= 7) return true;
       if (chartData.length <= 14) return index % 2 === 0;
 
       return index % 3 === 0;
     })
     .map((item) => item.label);
+  const selectedMetricLabel =
+    metric === "volume" ? t.volume : metric === "weight" ? t.weight : t.reps;
 
   if (!chartData.length) {
     return (
-      <div className="flex h-90 w-full flex-col items-center justify-center rounded-2xl border border-dashed bg-zinc-50/50 text-center">
-        <div className="mb-4 rounded-full bg-white p-4 shadow-sm">
-          <Dumbbell className="size-6 text-zinc-400" />
+      <div className="flex h-72 w-full flex-col items-center justify-center rounded-xl border border-dashed bg-zinc-50/50 px-4 text-center md:h-90 md:rounded-2xl">
+        <div className="mb-4 rounded-full bg-white p-3 shadow-sm md:p-4">
+          <Dumbbell className="size-5 text-zinc-400 md:size-6" />
         </div>
 
         <h3 className="text-sm font-semibold text-zinc-900">{t.emptyTitle}</h3>
@@ -109,156 +135,139 @@ export function ProgressChart() {
 
   return (
     <>
-      <div className="flex justify-between mb-4">
-        <h3 className="text-lg font-semibold">{t.progress}</h3>
-        {/* Date Menu */}
-        <div className="flex gap-2 md:gap-4">
-          {isMobile ? (
+      <div className="mb-4 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-lg font-semibold">{t.progress}</h3>
+
+            <p className="mt-1 truncate text-xs text-zinc-500 sm:max-w-sm">
+              {toTitleCase(selectedExercise)} - {selectedMetricLabel}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            {!isMobile && (
+              <ToggleGroup
+                value={period}
+                type="single"
+                className="flex-wrap justify-start sm:justify-end"
+                onValueChange={(value) => value && setPeriod(value)}
+              >
+                {PERIOD_OPTIONS.map((value) => (
+                  <ToggleGroupItem
+                    key={value}
+                    className="w-12 cursor-pointer"
+                    value={value}
+                    aria-label={`Toggle ${value}`}
+                  >
+                    {value === "max" ? t.max : value}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            )}
+
+            {/* Filters */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button
+                  className="size-9 cursor-pointer p-0 md:w-auto md:px-3"
                   variant="secondary"
-                  className="justify-between cursor-pointer"
+                  aria-label={t.filters}
                 >
-                  <Calendar className="size-4 text-zinc-500" />
-                  {period === "max" ? t.max : period}
+                  <SlidersHorizontal className="size-4" />
+                  <span className="hidden md:inline">{t.filters}</span>
                 </Button>
               </PopoverTrigger>
+              <PopoverContent
+                className="w-[min(20rem,calc(100vw-2rem))] p-4"
+                align="end"
+              >
+                <PopoverHeader className="mb-4">
+                  <PopoverTitle>{t.filters}</PopoverTitle>
+                  <PopoverDescription>{t.customizeChart}</PopoverDescription>
+                </PopoverHeader>
 
-              <PopoverContent className="w-40 p-2" align="end">
-                <div className="flex flex-col gap-1">
-                  {["7D", "30D", "90D", "1Y", "max"].map((value) => (
-                    <Button
-                      key={value}
-                      variant={period === value ? "default" : "ghost"}
-                      className="justify-start"
-                      onClick={() => setPeriod(value)}
+                <FieldGroup className="gap-4">
+                  <Field className="gap-2">
+                    <FieldLabel htmlFor="exercise">{t.exercise}</FieldLabel>
+                    <Select
+                      value={selectedExercise}
+                      onValueChange={(value) => setExercise(value)}
                     >
-                      {value === "max" ? t.max : value}
-                    </Button>
-                  ))}
-                </div>
+                      <SelectTrigger className="w-full cursor-pointer">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {uniqueExercises.map((exercise) => (
+                            <SelectItem key={exercise} value={exercise}>
+                              {toTitleCase(exercise)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field className="gap-2">
+                    <FieldLabel htmlFor="metric">{t.metric}</FieldLabel>
+
+                    <Select
+                      value={metric}
+                      onValueChange={(value) => setMetric(value)}
+                    >
+                      <SelectTrigger className="w-full cursor-pointer">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="volume">{t.volume}</SelectItem>
+                          <SelectItem value="weight">{t.weight}</SelectItem>
+                          <SelectItem value="reps">{t.reps}</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </FieldGroup>
               </PopoverContent>
             </Popover>
-          ) : (
-            <ToggleGroup
-              value={period}
-              type="single"
-              onValueChange={(value) => value && setPeriod(value)}
-            >
-              <ToggleGroupItem
-                className="cursor-pointer w-12"
-                value="7D"
-                aria-label="Toggle 7D"
-              >
-                7D
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                className="cursor-pointer w-12"
-                value="30D"
-                aria-label="Toggle 30D"
-              >
-                30D
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                className="cursor-pointer w-12"
-                value="90D"
-                aria-label="Toggle 90D"
-              >
-                90D
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                className="cursor-pointer w-12"
-                value="1Y"
-                aria-label="Toggle 90D"
-              >
-                1Y
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                className="cursor-pointer w-12"
-                value="max"
-                aria-label="Toggle max"
-              >
-                {t.max}
-              </ToggleGroupItem>
-            </ToggleGroup>
-          )}
-
-          {/* Filters */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button className="cursor-pointer" variant="secondary">
-                <SlidersHorizontal className="size-4" />
-                {t.filters}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 p-4" align="end">
-              <PopoverHeader className="mb-4">
-                <PopoverTitle>{t.filters}</PopoverTitle>
-                <PopoverDescription>{t.customizeChart}</PopoverDescription>
-              </PopoverHeader>
-
-              <FieldGroup className="gap-4">
-                <Field orientation="horizontal">
-                  <FieldLabel htmlFor="exercise" className="w-1/2">
-                    {t.exercise}
-                  </FieldLabel>
-                  <Select
-                    value={selectedExercise}
-                    onValueChange={(value) => setExercise(value)}
-                  >
-                    <SelectTrigger className="w-full max-w-40 cursor-pointer">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {uniqueExercises.map((exercise) => (
-                          <SelectItem key={exercise} value={exercise}>
-                            {toTitleCase(exercise)}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Field orientation="horizontal">
-                  <FieldLabel htmlFor="metric" className="w-1/2">
-                    {t.metric}
-                  </FieldLabel>
-
-                  <Select
-                    value={metric}
-                    onValueChange={(value) => setMetric(value)}
-                  >
-                    <SelectTrigger className="w-full max-w-40 cursor-pointer">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="volume">{t.volume}</SelectItem>
-                        <SelectItem value="weight">{t.weight}</SelectItem>
-                        <SelectItem value="reps">{t.reps}</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </FieldGroup>
-            </PopoverContent>
-          </Popover>
+          </div>
         </div>
+
+        {isMobile && (
+          <div className="grid grid-cols-5 gap-1 rounded-xl bg-zinc-100 p-1">
+            {PERIOD_OPTIONS.map((value) => {
+              const isSelected = period === value;
+
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  className={`h-8 cursor-pointer rounded-lg text-xs font-medium transition ${
+                    isSelected
+                      ? "bg-white text-zinc-950 shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }`}
+                  onClick={() => setPeriod(value)}
+                >
+                  {value === "max" ? t.max : value}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Chart */}
-      <div className="h-75 md:h-90 w-full">
+      <div className="h-72 w-full md:h-90">
         <ResponsiveBar
           data={chartData}
           keys={["value"]}
           indexBy="label"
           margin={{
-            top: 20,
-            right: isMobile ? 8 : 20,
+            top: isMobile ? 12 : 20,
+            right: isMobile ? 4 : 20,
             bottom: 45,
-            left: 60,
+            left: isMobile ? 38 : 60,
           }}
           padding={getBarPadding(chartData.length)}
           valueScale={{
@@ -288,7 +297,7 @@ export function ProgressChart() {
 
             text: {
               fill: "#9ca3af",
-              fontSize: 11,
+              fontSize: isMobile ? 10 : 11,
               fontFamily: "Inter, sans-serif",
             },
 
@@ -306,7 +315,7 @@ export function ProgressChart() {
 
                 text: {
                   fill: "#9ca3af",
-                  fontSize: 11,
+                  fontSize: isMobile ? 10 : 11,
                 },
               },
             },
@@ -334,7 +343,7 @@ export function ProgressChart() {
           axisRight={null}
           axisBottom={{
             tickSize: 0,
-            tickPadding: 12,
+            tickPadding: isMobile ? 8 : 12,
             tickRotation: isMobile ? -45 : chartData.length > 7 ? -25 : 0,
             tickValues: visibleTicks,
           }}
@@ -342,6 +351,7 @@ export function ProgressChart() {
             tickSize: 0,
             tickPadding: 10,
             tickValues: 5,
+            format: (value) => formatChartNumber(Number(value)),
           }}
           enableGridY
           gridYValues={5}
