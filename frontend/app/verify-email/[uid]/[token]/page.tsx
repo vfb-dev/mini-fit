@@ -7,9 +7,9 @@ import { useParams } from "next/navigation";
 import { translations } from "@/lib/translations";
 import { useLanguageStore } from "@/store/languageStore";
 
-type VerifyStatus = "loading" | "success" | "error";
+import { apiUrl } from "@/lib/api";
 
-const API_URL = "http://localhost:8000";
+type VerifyStatus = "loading" | "success" | "error";
 
 export default function VerifyEmailPage() {
   const params = useParams<{ uid: string; token: string }>();
@@ -37,7 +37,7 @@ export default function VerifyEmailPage() {
     async function verifyEmail() {
       try {
         const response = await fetch(
-          `${API_URL}/verify-email/${uid}/${token}/`,
+          apiUrl(`/verify-email/${uid}/${token}/`),
           {
             method: "GET",
           },

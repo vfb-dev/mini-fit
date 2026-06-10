@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { CheckCircle2, Mail } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { translations } from "@/lib/translations";
 import { useLanguageStore } from "@/store/languageStore";
 
-export default function CheckEmailPage() {
+function CheckEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const { language } = useLanguageStore();
@@ -66,5 +67,13 @@ export default function CheckEmailPage() {
         </p>
       </section>
     </main>
+  );
+}
+
+export default function CheckEmailPage() {
+  return (
+    <Suspense fallback={null}>
+      <CheckEmailContent />
+    </Suspense>
   );
 }
