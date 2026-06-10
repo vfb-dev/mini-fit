@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <ProtectedRoute>
-      <div className="w-full max-w-7xl p-6">
+      <div
+        className="w-full max-w-7xl 
+      p-6"
+      >
         <div className="grid grid-cols-12 gap-6">
           {/* Stats Cards */}
           <div className="col-span-12">

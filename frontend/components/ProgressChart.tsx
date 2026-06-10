@@ -98,9 +98,7 @@ export function ProgressChart() {
           <Dumbbell className="size-6 text-zinc-400" />
         </div>
 
-        <h3 className="text-sm font-semibold text-zinc-900">
-          {t.emptyTitle}
-        </h3>
+        <h3 className="text-sm font-semibold text-zinc-900">{t.emptyTitle}</h3>
 
         <p className="mt-1 max-w-xs text-sm text-zinc-500">
           {t.emptyDescription}
@@ -251,7 +249,7 @@ export function ProgressChart() {
       </div>
 
       {/* Chart */}
-      <div className="h-90 w-full">
+      <div className="h-75 md:h-90 w-full">
         <ResponsiveBar
           data={chartData}
           keys={["value"]}
@@ -260,7 +258,7 @@ export function ProgressChart() {
             top: 20,
             right: isMobile ? 8 : 20,
             bottom: 45,
-            left: isMobile ? 30 : 60,
+            left: 60,
           }}
           padding={getBarPadding(chartData.length)}
           valueScale={{
