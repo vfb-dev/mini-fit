@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 <Input
                   id="username"
                   type="text"
-                  placeholder="victor"
+                  placeholder="arnold"
                   className="pl-10 h-11 rounded-xl"
                   {...register("username")}
                 />
