@@ -1,0 +1,189 @@
+"use client";
+
+import { Dumbbell, ChevronDown, MoreHorizontal } from "lucide-react";
+
+import { useState } from "react";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { Button } from "@/components/ui/button";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteExercise } from "@/services/exercises";
+import { translations } from "@/lib/translations";
+import { useLanguageStore } from "@/store/languageStore";
+import { useModalStore } from "@/store/modalStore";
+
+type Exercise = {
+  id: number;
+  name: string;
+  date: string;
+  reps: number;
+  weight: number;
+};
+
+type ExerciseGroup = {
+  group_id: string;
+  name: string;
+  date: string;
+  sets: number;
+  exercises: Exercise[];
+};
+
+type ExerciseTileProps = {
+  exercise: ExerciseGroup;
+  handleSelectedExercise: (ex: Exercise) => void;
+};
+
+function toTitleCase(text: string) {
+  return text.replace(/\w\S*/g, (word) => {
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+}
+
+export function ExerciseTile({
+  exercise,
+  handleSelectedExercise,
+}: ExerciseTileProps) {
+  const { handleEditModal } = useModalStore();
+  const [isOpen, setisOpen] = useState<boolean>(false);
+
+  const { language } = useLanguageStore();
+  const t = translations[language].dashboard.history;
+
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteExercise,
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["history"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["unique_exercises"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["chart"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["stats_cards"],
+      });
+    },
+  });
+
+  return (
+    <div className="w-full bg-white rounded-lg shadow-sm p-2">
+      <div className="flex h-full items-center gap-3">
+        <div className="rounded-lg bg-zinc-100 p-3">
+          <Dumbbell className="size-6" />
+        </div>
+
+        <div>
+          <p>{toTitleCase(exercise.name)}</p>
+          <p className="text-sm text-zinc-400">{exercise.date}</p>
+        </div>
+
+        <div className="ml-auto text-2xl font-bold">{exercise.sets}</div>
+
+        <button
+          onClick={() => setisOpen((prev) => !prev)}
+          className="cursor-pointer bg-white text-zinc-500 rounded-full border p-1 shadow-sm transition-all duration-300 hover:scale-110 hover:bg-zinc-100 hover:text-black"
+        >
+          <ChevronDown
+            className={`size-4 transition-transform duration-500 ${isOpen ? "rotate-180" : "rotate-0"}`}
+          ></ChevronDown>
+        </button>
+      </div>
+
+      <div
+        className={`
+        overflow-hidden
+        transition-all
+        duration-500
+        ease-in-out
+        ${isOpen ? "max-h-125 opacity-100 mt-2" : "max-h-0 opacity-0"}
+      `}
+      >
+        <Table className="mt-2">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-zinc-500">Sets</TableHead>
+
+              <TableHead className="text-zinc-500">Reps</TableHead>
+
+              <TableHead className="text-zinc-500">Weigth</TableHead>
+
+              <TableHead className="text-zinc-500">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {exercise.exercises.map((ex, index) => {
+              return (
+                <TableRow key={ex.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{ex.reps}</TableCell>
+                  <TableCell>{ex.weight}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 cursor-pointer"
+                        >
+                          <MoreHorizontal />
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent align="center">
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => {
+                            handleSelectedExercise(ex);
+                            handleEditModal(true);
+                          }}
+                        >
+                          {t.edit}
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          variant="destructive"
+                          onClick={() => deleteMutation.mutate(ex.id)}
+                        >
+                          {t.delete}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
