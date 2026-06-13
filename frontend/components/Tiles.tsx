@@ -1,3 +1,6 @@
+import { NotebookPen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 import { getExercisesHistory } from "@/services/exercises";
 import { ExerciseTile } from "./ExerciseTile";
 
@@ -6,6 +9,7 @@ import { useState } from "react";
 
 import { CreateExerciseModal } from "@/components/CreateExerciseModal";
 import { EditExerciseModal } from "@/components/EditExerciseModal";
+import { useModalStore } from "@/store/modalStore";
 
 type Exercise = {
   id: number;
@@ -31,6 +35,7 @@ type ExercisesResponse = {
 };
 
 export function Tiles() {
+  const { handleCreateModal } = useModalStore();
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
     null,
   );
@@ -66,6 +71,14 @@ export function Tiles() {
           />
         ))}
       </div>
+
+      <Button
+        size="icon"
+        className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-xl"
+        onClick={() => handleCreateModal(true)}
+      >
+        <NotebookPen className="size-6" />
+      </Button>
     </>
   );
 }

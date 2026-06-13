@@ -69,6 +69,10 @@ export function CreateExerciseModal() {
       });
 
       await queryClient.invalidateQueries({
+        queryKey: ["history"],
+      });
+
+      await queryClient.invalidateQueries({
         queryKey: ["unique_exercises"],
       });
 
@@ -185,8 +189,8 @@ export function CreateExerciseModal() {
                     htmlFor="reps"
                     className="text-sm font-semibold text-zinc-800"
                   >
-                  {t.common.reps}
-                </Label>
+                    {t.common.reps}
+                  </Label>
                   <div className="relative">
                     <Hash className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
                     <Input
