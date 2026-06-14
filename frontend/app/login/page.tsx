@@ -51,7 +51,7 @@ export default function LoginPage() {
 
   return (
     <PublicOnlyRoute>
-      <div className="min-h-screen flex items-center justify-center px-4 pb-10">
+      <div className="flex items-center justify-center p-4">
         {/* Card */}
         <div className="w-full md:w-md bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
           {/* Header */}

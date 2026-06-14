@@ -36,7 +36,7 @@ export default function RootLayout({
               <MobileMenu />
             </div>
 
-            <div className="flex min-h-screen justify-center">
+            <div className="flex min-h-[calc(100vh-100px)] md:min-h-screen justify-center">
               <Providers>{children}</Providers>
             </div>
           </main>

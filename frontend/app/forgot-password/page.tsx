@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
+    <main className="flex items-center justify-center p-4">
       <section className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl">
         <h1 className="text-2xl font-bold text-zinc-900">
           {t.forgotPasswordPage.title}

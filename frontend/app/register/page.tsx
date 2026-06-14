@@ -82,7 +82,7 @@ export default function RegisterPage() {
 
   return (
     <PublicOnlyRoute>
-      <div className="min-h-screen flex items-center justify-center px-4 py-10">
+      <div className="flex items-center justify-center p-4">
         <div className="w-full md:w-md bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900">

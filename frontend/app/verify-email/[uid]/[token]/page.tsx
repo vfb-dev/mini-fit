@@ -36,12 +36,9 @@ export default function VerifyEmailPage() {
 
     async function verifyEmail() {
       try {
-        const response = await fetch(
-          apiUrl(`/verify-email/${uid}/${token}/`),
-          {
-            method: "GET",
-          },
-        );
+        const response = await fetch(apiUrl(`/verify-email/${uid}/${token}/`), {
+          method: "GET",
+        });
 
         const data = await response.json().catch(() => null);
 
@@ -57,11 +54,7 @@ export default function VerifyEmailPage() {
         if (!isMounted) return;
 
         setStatus("error");
-        setMessage(
-          error instanceof Error
-            ? error.message
-            : t.unknownError,
-        );
+        setMessage(error instanceof Error ? error.message : t.unknownError);
       }
     }
 
@@ -70,15 +63,20 @@ export default function VerifyEmailPage() {
     return () => {
       isMounted = false;
     };
-  }, [hasInvalidLink, t.successMessage, t.unknownError, t.verifyError, uid, token]);
+  }, [
+    hasInvalidLink,
+    t.successMessage,
+    t.unknownError,
+    t.verifyError,
+    uid,
+    token,
+  ]);
 
   const viewStatus: VerifyStatus = hasInvalidLink ? "error" : status;
-  const viewMessage = hasInvalidLink
-    ? t.invalidLink
-    : message;
+  const viewMessage = hasInvalidLink ? t.invalidLink : message;
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
+    <main className="flex items-center justify-center px-4">
       <section className="w-full max-w-md text-center">
         <h1 className="text-2xl font-bold text-zinc-900">
           {viewStatus === "loading" && t.verifyingTitle}

@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
+    <main className="flex items-center justify-center p-4">
       <section className="w-full md:w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl">
         <h1 className="text-2xl font-bold text-zinc-900">
           {t.resetPasswordPage.title}
@@ -90,9 +90,7 @@ export default function ResetPasswordPage() {
           </div>
 
           <div className="mt-4 space-y-2">
-            <Label htmlFor="confirmPassword">
-              {t.common.confirmPassword}
-            </Label>
+            <Label htmlFor="confirmPassword">{t.common.confirmPassword}</Label>
 
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />

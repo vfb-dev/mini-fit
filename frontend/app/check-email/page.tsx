@@ -16,7 +16,7 @@ function CheckEmailContent() {
   const t = translations[language].checkEmailPage;
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
+    <main className="flex items-center justify-center p-4">
       <section className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 text-center shadow-xl">
         <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
           <Mail className="size-8" />
@@ -38,9 +38,7 @@ function CheckEmailContent() {
             <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600" />
 
             <div>
-              <p className="text-sm font-medium text-zinc-900">
-                {t.emailSent}
-              </p>
+              <p className="text-sm font-medium text-zinc-900">{t.emailSent}</p>
 
               <p className="mt-1 text-sm leading-5 text-zinc-500">
                 {t.spamHint}
