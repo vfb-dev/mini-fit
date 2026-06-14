@@ -78,6 +78,12 @@ class ExerciseViewset(viewsets.ModelViewSet):
                 "reps": exercise.reps,
             })
 
+            for group in grouped.values():
+                group["exercises"].sort(
+                    key=lambda exercise: exercise["date"],
+                    reverse=False # oldest first
+                )
+
         history = list(grouped.values())
 
         page = self.paginate_queryset(history)
