@@ -126,13 +126,13 @@ export function ExerciseTile({
         <Table className="mt-2">
           <TableHeader>
             <TableRow>
-              <TableHead className="text-zinc-500">Sets</TableHead>
+              <TableHead className="text-zinc-500">{t.sets}</TableHead>
 
-              <TableHead className="text-zinc-500">Reps</TableHead>
+              <TableHead className="text-zinc-500">{t.reps}</TableHead>
 
-              <TableHead className="text-zinc-500">Weigth</TableHead>
+              <TableHead className="text-zinc-500">{t.weight}</TableHead>
 
-              <TableHead className="text-zinc-500">Actions</TableHead>
+              <TableHead className="text-zinc-500">{t.actions}</TableHead>
             </TableRow>
           </TableHeader>
 

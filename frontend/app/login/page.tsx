@@ -63,9 +63,7 @@ export default function LoginPage() {
               {t.loginPage.title}
             </h1>
 
-            <p className="text-sm text-zinc-500 mt-1">
-              {t.loginPage.subtitle}
-            </p>
+            <p className="text-sm text-zinc-500 mt-1">{t.loginPage.subtitle}</p>
           </div>
 
           {/* Form */}
