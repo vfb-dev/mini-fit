@@ -51,19 +51,22 @@ export default function LoginPage() {
 
   return (
     <PublicOnlyRoute>
-      <div className="flex items-center justify-center p-4">
-        {/* Card */}
-        <div className="w-full md:w-md bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
-          {/* Header */}
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900">
-            <LogIn className="size-6" />
+      <div className="flex items-center justify-center px-4 py-6 md:py-10">
+        <div className="w-full md:w-md bg-white rounded-2xl md:rounded-3xl shadow-xl border border-zinc-200 p-5 sm:p-6 md:p-8">
+          {/* Header Icon */}
+          <div className="mx-auto mb-3 md:mb-4 flex size-10 md:size-12 items-center justify-center rounded-xl md:rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900">
+            <LogIn className="size-5 md:size-6" />
           </div>
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-zinc-900">
+
+          {/* Header */}
+          <div className="mb-6 md:mb-8 text-center">
+            <h1 className="text-xl md:text-2xl font-bold text-zinc-900">
               {t.loginPage.title}
             </h1>
 
-            <p className="text-sm text-zinc-500 mt-1">{t.loginPage.subtitle}</p>
+            <p className="mt-1 text-sm text-zinc-500">
+              {t.loginPage.subtitle}
+            </p>
           </div>
 
           {/* Form */}
@@ -73,37 +76,37 @@ export default function LoginPage() {
               <Label htmlFor="email">{t.common.email}</Label>
 
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+                <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
 
                 <Input
                   id="email"
                   type="email"
                   placeholder="example@gmail.com"
-                  className="pl-10 h-11 rounded-xl"
+                  className="h-10 md:h-11 rounded-xl pl-10"
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
 
             {/* Password */}
-            <div className="space-y-2 mt-4">
+            <div className="mt-4 space-y-2">
               <Label htmlFor="password">{t.common.password}</Label>
 
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
 
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="********"
-                  className="pl-10 pr-10 h-11 rounded-xl"
+                  className="h-10 md:h-11 rounded-xl pl-10 pr-10"
                   onChange={(e) => setPassword(e.target.value)}
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition hover:text-zinc-600"
                 >
                   {showPassword ? (
                     <EyeOff className="size-5 cursor-pointer" />
@@ -117,24 +120,26 @@ export default function LoginPage() {
             {/* Forgot Password */}
             <Link
               href="/forgot-password"
-              className="mt-1 mb-6 text-sm text-right text-zinc-500 hover:text-black transition"
+              className="mt-2 mb-5 text-right text-sm text-zinc-500 transition hover:text-black"
             >
               {t.loginPage.forgotPassword}
             </Link>
 
-            {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
+            {error && (
+              <p className="mb-2 text-sm text-red-500">{error}</p>
+            )}
 
-            {/* Button */}
+            {/* Submit Button */}
             <Button
               type="submit"
-              className="h-11 mt-2 rounded-xl cursor-pointer text-base font-medium"
+              className="mt-2 h-10 md:h-11 rounded-xl text-sm md:text-base font-medium cursor-pointer"
             >
               {t.common.login}
             </Button>
           </form>
 
           {/* Footer */}
-          <p className="text-sm text-center text-zinc-500 mt-4">
+          <p className="mt-5 text-center text-sm text-zinc-500">
             {t.loginPage.noAccount}{" "}
             <Link
               href="/register"

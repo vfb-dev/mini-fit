@@ -82,14 +82,14 @@ export default function RegisterPage() {
 
   return (
     <PublicOnlyRoute>
-      <div className="flex items-center justify-center p-4">
-        <div className="w-full md:w-md bg-white rounded-3xl shadow-xl border border-zinc-200 p-8">
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900">
-              <UserPlus className="size-6" />
-            </div>
+      <div className="flex items-center justify-center px-4 py-6 md:py-10">
+        <div className="w-full md:w-md bg-white rounded-2xl md:rounded-3xl shadow-xl border border-zinc-200 p-5 sm:p-6 md:p-8">
+          <div className="mb-6 md:mb-8 text-center">
+          <div className="mx-auto mb-3 md:mb-4 flex size-10 md:size-12 items-center justify-center rounded-xl md:rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900">
+            <UserPlus className="size-5 md:size-6" />
+          </div>
 
-            <h1 className="text-2xl font-bold text-zinc-900">
+            <h1 className="text-xl md:text-2xl font-bold text-zinc-900">
               {t.registerPage.title}
             </h1>
 
@@ -109,7 +109,7 @@ export default function RegisterPage() {
                   id="username"
                   type="text"
                   placeholder="arnold"
-                  className="pl-10 h-11 rounded-xl"
+                  className="pl-10 h-10 md:h-11 rounded-xl"
                   {...register("username")}
                 />
               </div>
@@ -131,7 +131,7 @@ export default function RegisterPage() {
                   id="email"
                   type="email"
                   placeholder="example@gmail.com"
-                  className="pl-10 h-11 rounded-xl"
+                  className="pl-10 h-10 md:h-11 rounded-xl"
                   {...register("email")}
                 />
               </div>
@@ -151,7 +151,7 @@ export default function RegisterPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="********"
-                  className="pl-10 pr-10 h-11 rounded-xl"
+                  className="pl-10 pr-10 h-10 md:h-11 rounded-xl"
                   {...register("password")}
                 />
 
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="********"
-                  className="pl-10 pr-10 h-11 rounded-xl"
+                  className="pl-10 pr-10 h-10 md:h-11 rounded-xl"
                   {...register("confirmPassword")}
                 />
 
@@ -225,7 +225,7 @@ export default function RegisterPage() {
 
             <Button
               type="submit"
-              className="h-11 mt-6 rounded-xl cursor-pointer text-base font-medium"
+              className="h-10 md:h-11 mt-6 rounded-xl cursor-pointer text-sm md:text-base font-medium"
               disabled={isSubmitting}
             >
               {isSubmitting
@@ -234,7 +234,7 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <p className="text-sm text-center text-zinc-500 mt-4">
+          <p className="text-sm text-center text-zinc-500 mt-5">
             {t.registerPage.alreadyHaveAccount}{" "}
             <Link
               href="/login"
