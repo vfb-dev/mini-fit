@@ -12,9 +12,19 @@ export async function getExercises(page = 1) {
   return response.json();
 }
 
-export async function getExercisesHistory(page = 1) {
+type HistoryParams = { page?: number; search?: string };
+export async function getExercisesHistory({
+  page = 1,
+  search,
+}: HistoryParams = {}) {
+  const params = new URLSearchParams({ page: String(page) });
+
+  if (search) {
+    params.set("search", search);
+  }
+
   const response = await apiFetch(
-    apiUrl(`/api/v1/exercises/history/?page=${page}`),
+    apiUrl(`/api/v1/exercises/history/?${params}`),
   );
 
   if (!response.ok) {

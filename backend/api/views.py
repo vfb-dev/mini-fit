@@ -54,7 +54,12 @@ class ExerciseViewset(viewsets.ModelViewSet):
     
     @action(detail=False, methods=["get"])
     def history(self, request):
+        search = request.query_params.get("search")
+
         exercises = self.get_queryset().only("id","name","date","weight","reps")
+
+        if search:
+            exercises = self.get_queryset().filter(name__icontains=search).only("id","name","date","weight","reps")
 
         grouped = {}
 

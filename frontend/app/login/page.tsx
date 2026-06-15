@@ -64,9 +64,7 @@ export default function LoginPage() {
               {t.loginPage.title}
             </h1>
 
-            <p className="mt-1 text-sm text-zinc-500">
-              {t.loginPage.subtitle}
-            </p>
+            <p className="mt-1 text-sm text-zinc-500">{t.loginPage.subtitle}</p>
           </div>
 
           {/* Form */}
@@ -125,9 +123,7 @@ export default function LoginPage() {
               {t.loginPage.forgotPassword}
             </Link>
 
-            {error && (
-              <p className="mb-2 text-sm text-red-500">{error}</p>
-            )}
+            {error && <p className="mb-2 text-sm text-red-500">{error}</p>}
 
             {/* Submit Button */}
             <Button

@@ -1,5 +1,6 @@
-import { NotebookPen } from "lucide-react";
+import { NotebookPen, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { getExercisesHistory } from "@/services/exercises";
 import { ExerciseTile } from "./ExerciseTile";
@@ -45,6 +46,7 @@ function getNextHistoryPage(lastPage: ExercisesResponse) {
 
 export function Tiles() {
   const { handleCreateModal } = useModalStore();
+  const [userSearch, setUserSearch] = useState<string>("");
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
     null,
   );
@@ -53,8 +55,12 @@ export function Tiles() {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery<ExercisesResponse>({
-      queryKey: ["history"],
-      queryFn: ({ pageParam }) => getExercisesHistory(Number(pageParam)),
+      queryKey: ["history", userSearch],
+      queryFn: ({ pageParam }) =>
+        getExercisesHistory({
+          page: Number(pageParam),
+          search: userSearch,
+        }),
       initialPageParam: 1,
       getNextPageParam: getNextHistoryPage,
     });
@@ -89,9 +95,24 @@ export function Tiles() {
       <EditExerciseModal selectedExercise={selectedExercise} />
 
       <div className="flex flex-col gap-2">
-        <div className="flex">
+        {/* History Header */}
+        <div className="flex flex-col gap-2 mb-2">
           <h3 className="text-lg font-semibold">History</h3>
+
+          <div className="relative w-full">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+
+            <Input
+              id="exercise"
+              type="text"
+              placeholder="Search..."
+              className="h-11 w-full rounded-md bg-white pl-10"
+              onChange={(e) => setUserSearch(e.target.value)}
+            />
+          </div>
         </div>
+
+        {/* Tiles*/}
         {isLoading ? (
           <>
             <TileSkeleton />
