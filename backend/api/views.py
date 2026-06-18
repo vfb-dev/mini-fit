@@ -157,6 +157,9 @@ class ExerciseViewset(viewsets.ModelViewSet):
     def stats_cards(self, request):
         queryset = self.get_queryset()
 
+        # 🏋️‍♀️ Workouts
+        workouts = queryset.values_list("date__date", flat=True).distinct().count()
+
         # 🔥 Streak
         workout_days = list(
             queryset
@@ -181,6 +184,27 @@ class ExerciseViewset(viewsets.ModelViewSet):
             else:
                 break
 
+        # ⚡ Frequency
+        frequency = 0
+        four_weeks_ago = timezone.now() - timedelta(days=28)
+
+        weekly_frequency = (
+            queryset
+            .filter(date__gte=four_weeks_ago)
+            .annotate(week=TruncWeek("date"))
+            .values("week")
+            .annotate(
+                workouts=Count("date__date", distinct=True)
+            )
+            .order_by("week")
+        )
+
+        frequency = round(
+            sum(item["workouts"] for item in weekly_frequency)
+            / max(len(weekly_frequency), 1),
+            1,
+        )
+
         # 💖 Recovery
         recovery = 100
 
@@ -193,28 +217,11 @@ class ExerciseViewset(viewsets.ModelViewSet):
 
             recovery = min(int((hours_since_workout / 48) * 100), 100)
 
-        # ⚡ Frequency
-        frequency = 0
-
-        four_weeks_ago = timezone.now() - timedelta(days=28)
-
-        workout_days_last_month = (
-            queryset
-            .filter(date__gte=four_weeks_ago)
-            .values_list("date__date", flat=True)
-            .distinct()
-        )
-
-        frequency = round(len(workout_days_last_month) / 4, 1)
-
-        # ⭐ Score
-        score = min((streak * 2 + frequency * 10 + recovery * 0.3),100)
-
         data = {
+            "workouts": workouts,
             "streak": streak,
-            "recovery": recovery,
             "frequency": round(frequency, 1),
-            "score": score,
+            "recovery": recovery,
         }
 
         return Response(data)

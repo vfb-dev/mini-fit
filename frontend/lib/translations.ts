@@ -113,10 +113,10 @@ export const translations = {
     },
     dashboard: {
       stats: {
+        workouts: "Workouts",
         streak: "Streak",
-        recovery: "Recovery",
         frequency: "Frequency",
-        score: "Score",
+        recovery: "Recovery",
       },
       chart: {
         emptyTitle: "No progress data yet",
@@ -278,10 +278,10 @@ export const translations = {
     },
     dashboard: {
       stats: {
+        workouts: "Treinos",
         streak: "Sequência",
-        recovery: "Recuperação",
         frequency: "Frequência",
-        score: "Pontuação",
+        recovery: "Recuperação",
       },
       chart: {
         emptyTitle: "Ainda não há dados de progresso",

@@ -1,17 +1,17 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Flame, Heart, Zap, Star } from "lucide-react";
+import { Flame, Heart, Zap, Dumbbell } from "lucide-react";
 
 import { getStatsCardsData } from "@/services/stats";
 import { translations } from "@/lib/translations";
 import { useLanguageStore } from "@/store/languageStore";
 
 type StatsCardsData = {
+  workouts: number;
   streak: number;
-  recovery: number;
   frequency: number;
-  score: number;
+  recovery: number;
 };
 
 export function StatsCards() {
@@ -25,14 +25,14 @@ export function StatsCards() {
 
   const cards = [
     {
+      title: t.workouts,
+      value: `${statsCardsData?.workouts ?? 0}`,
+      icon: Dumbbell,
+    },
+    {
       title: t.streak,
       value: statsCardsData?.streak ?? 0,
       icon: Flame,
-    },
-    {
-      title: t.recovery,
-      value: `${statsCardsData?.recovery ?? 0}%`,
-      icon: Heart,
     },
     {
       title: t.frequency,
@@ -40,9 +40,9 @@ export function StatsCards() {
       icon: Zap,
     },
     {
-      title: t.score,
-      value: `${statsCardsData?.score ?? 0}`,
-      icon: Star,
+      title: t.recovery,
+      value: `${statsCardsData?.recovery ?? 0}%`,
+      icon: Heart,
     },
   ];
 
