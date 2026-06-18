@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Flame, TrendingUp, Repeat, Dumbbell } from "lucide-react";
+import { Flame, Heart, Zap, Star } from "lucide-react";
 
 import { getStatsCardsData } from "@/services/stats";
 import { translations } from "@/lib/translations";
@@ -9,9 +9,9 @@ import { useLanguageStore } from "@/store/languageStore";
 
 type StatsCardsData = {
   streak: number;
-  avg_weekly_volume_progress: number;
-  avg_weekly_reps_progress: number;
-  avg_weekly_weight_progress: number;
+  recovery: number;
+  frequency: number;
+  score: number;
 };
 
 export function StatsCards() {
@@ -30,19 +30,19 @@ export function StatsCards() {
       icon: Flame,
     },
     {
-      title: t.volumeProgress,
-      value: `${statsCardsData?.avg_weekly_volume_progress ?? 0}%`,
-      icon: TrendingUp,
+      title: t.recovery,
+      value: `${statsCardsData?.recovery ?? 0}%`,
+      icon: Heart,
     },
     {
-      title: t.repsProgress,
-      value: `${statsCardsData?.avg_weekly_reps_progress ?? 0}%`,
-      icon: Repeat,
+      title: t.frequency,
+      value: `${statsCardsData?.frequency ?? 0}`,
+      icon: Zap,
     },
     {
-      title: t.weightProgress,
-      value: `${statsCardsData?.avg_weekly_weight_progress ?? 0}%`,
-      icon: Dumbbell,
+      title: t.score,
+      value: `${statsCardsData?.score ?? 0}`,
+      icon: Star,
     },
   ];
 

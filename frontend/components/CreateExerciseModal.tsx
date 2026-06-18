@@ -90,7 +90,10 @@ export function CreateExerciseModal() {
   });
 
   function onSubmit(formData: FormData) {
-    createMutation.mutate(formData);
+    createMutation.mutate({
+      ...formData,
+      date: new Date(formData.date).toISOString(),
+    });
   }
 
   if (!createModal) return null;

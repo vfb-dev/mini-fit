@@ -114,9 +114,9 @@ export const translations = {
     dashboard: {
       stats: {
         streak: "Streak",
-        volumeProgress: "Volume Progress",
-        repsProgress: "Reps Progress",
-        weightProgress: "Weight Progress",
+        recovery: "Recovery",
+        frequency: "Frequency",
+        score: "Score",
       },
       chart: {
         emptyTitle: "No progress data yet",
@@ -279,9 +279,9 @@ export const translations = {
     dashboard: {
       stats: {
         streak: "Sequência",
-        volumeProgress: "Progresso de volume",
-        repsProgress: "Progresso de repetições",
-        weightProgress: "Progresso de peso",
+        recovery: "Recuperação",
+        frequency: "Frequência",
+        score: "Pontuação",
       },
       chart: {
         emptyTitle: "Ainda não há dados de progresso",

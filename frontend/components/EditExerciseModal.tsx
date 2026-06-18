@@ -77,13 +77,16 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
 
   useEffect(() => {
     if (selectedExercise) {
+      const date = new Date(selectedExercise.date);
+
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+
       reset({
         name: selectedExercise.name,
         reps: selectedExercise.reps,
         weight: Number(selectedExercise.weight),
 
-        // format for datetime-local input
-        date: selectedExercise.date.slice(0, 16),
+        date: date.toISOString().slice(0, 16),
       });
     }
   }, [selectedExercise, reset]);
@@ -123,7 +126,10 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
 
     updateMutation.mutate({
       id: selectedExercise.id,
-      exerciseData: formData,
+      exerciseData: {
+        ...formData,
+        date: new Date(formData.date).toISOString(),
+      },
     });
   }
 

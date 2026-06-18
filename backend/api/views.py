@@ -181,93 +181,40 @@ class ExerciseViewset(viewsets.ModelViewSet):
             else:
                 break
 
-        # 📦 Weekly Volume Progress
-        weekly_volume = (
+        # 💖 Recovery
+        recovery = 100
+
+        last_workout = queryset.order_by("-date").first()
+
+        if last_workout:
+            hours_since_workout = (
+                timezone.now() - last_workout.date
+            ).total_seconds() / 3600
+
+            recovery = min(int((hours_since_workout / 48) * 100), 100)
+
+        # ⚡ Frequency
+        frequency = 0
+
+        four_weeks_ago = timezone.now() - timedelta(days=28)
+
+        workout_days_last_month = (
             queryset
-            .annotate(group_date=TruncWeek("date"))
-            .annotate(volume=F("weight") * F("reps"))
-            .values("group_date")
-            .annotate(total_volume=Sum("volume"))
-            .order_by("group_date")
+            .filter(date__gte=four_weeks_ago)
+            .values_list("date__date", flat=True)
+            .distinct()
         )
 
-        weekly_volume = list(weekly_volume)
+        frequency = round(len(workout_days_last_month) / 4, 1)
 
-        volume_progressions = []
-
-        for i in range(1, len(weekly_volume)):
-            current = weekly_volume[i]["total_volume"] or 0
-            previous = weekly_volume[i - 1]["total_volume"] or 0
-
-            if previous > 0:
-                progress = ((current - previous) / previous) * 100
-                volume_progressions.append(progress)
-
-        avg_weekly_volume_progress = (
-            sum(volume_progressions) / len(volume_progressions)
-            if volume_progressions
-            else 0
-        )
-
-        # 🔁 Weekly Reps Progress
-        weekly_reps = (
-            queryset
-            .annotate(group_date=TruncWeek("date"))
-            .values("group_date")
-            .annotate(total_reps=Sum("reps"))
-            .order_by("group_date")
-        )
-
-        weekly_reps = list(weekly_reps)
-
-        reps_progressions = []
-
-        for i in range(1, len(weekly_reps)):
-            current = weekly_reps[i]["total_reps"] or 0
-            previous = weekly_reps[i - 1]["total_reps"] or 0
-
-            if previous > 0:
-                progress = ((current - previous) / previous) * 100
-                reps_progressions.append(progress)
-
-        avg_weekly_reps_progress = (
-            sum(reps_progressions) / len(reps_progressions)
-            if reps_progressions
-            else 0
-        )
-
-        # 🏋️ Weekly Weight Progress
-        weekly_weight = (
-            queryset
-            .annotate(group_date=TruncWeek("date"))
-            .values("group_date")
-            .annotate(avg_weight=Avg("weight"))
-            .order_by("group_date")
-        )
-
-        weekly_weight = list(weekly_weight)
-
-        weight_progressions = []
-
-        for i in range(1, len(weekly_weight)):
-            current = weekly_weight[i]["avg_weight"] or 0
-            previous = weekly_weight[i - 1]["avg_weight"] or 0
-
-            if previous > 0:
-                progress = ((current - previous) / previous) * 100
-                weight_progressions.append(progress)
-
-        avg_weekly_weight_progress = (
-            sum(weight_progressions) / len(weight_progressions)
-            if weight_progressions
-            else 0
-        )
+        # ⭐ Score
+        score = min((streak * 2 + frequency * 10 + recovery * 0.3),100)
 
         data = {
             "streak": streak,
-            "avg_weekly_volume_progress": round(avg_weekly_volume_progress, 1),
-            "avg_weekly_reps_progress": round(avg_weekly_reps_progress, 1),
-            "avg_weekly_weight_progress": round(avg_weekly_weight_progress, 1),
+            "recovery": recovery,
+            "frequency": round(frequency, 1),
+            "score": score,
         }
 
         return Response(data)
