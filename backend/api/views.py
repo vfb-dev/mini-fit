@@ -12,8 +12,8 @@ from .serializers import (
 )
 from .pagination import ExercisePagination
 
-from django.db.models import Sum, Max, Avg, F, Count
-from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
+from django.db.models import Sum, Max, F
+from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 from datetime import timedelta
 from django.utils import timezone
 
@@ -157,71 +157,62 @@ class ExerciseViewset(viewsets.ModelViewSet):
     def stats_cards(self, request):
         queryset = self.get_queryset()
 
-        # 🏋️‍♀️ Workouts
-        workouts = queryset.values_list("date__date", flat=True).distinct().count()
-
-        # 🔥 Streak
         workout_days = list(
             queryset
             .values_list("date__date", flat=True)
             .distinct()
-            .order_by("-date__date")
+            .order_by("date__date")
+        )
+
+        total_workouts = len(workout_days)
+        today = timezone.localdate()
+        month_start = today.replace(day=1)
+        if month_start.month == 12:
+            next_month_start = month_start.replace(
+                year=month_start.year + 1,
+                month=1,
+            )
+        else:
+            next_month_start = month_start.replace(month=month_start.month + 1)
+        month_workouts = sum(
+            1 for day in workout_days if month_start <= day < next_month_start
         )
 
         streak = 0
+        max_streak = 0
 
         if workout_days:
-            streak = 1
+            current_streak = 0
+            previous_day = None
 
-        for i in range(len(workout_days) - 1):
-            current_day = workout_days[i]
-            next_day = workout_days[i + 1]
+            for day in workout_days:
+                if previous_day is None or day - previous_day <= timedelta(days=2):
+                    current_streak += 1
+                else:
+                    current_streak = 1
 
-            difference = current_day - next_day
+                max_streak = max(max_streak, current_streak)
+                previous_day = day
 
-            if difference <= timedelta(days=2):
-                streak += 1
-            else:
-                break
+            last_workout_day = workout_days[-1]
 
-        # ⚡ Frequency
-        frequency = 0
-        four_weeks_ago = timezone.now() - timedelta(days=28)
+            if today - last_workout_day <= timedelta(days=2):
+                streak = 1
 
-        weekly_frequency = (
-            queryset
-            .filter(date__gte=four_weeks_ago)
-            .annotate(week=TruncWeek("date"))
-            .values("week")
-            .annotate(
-                workouts=Count("date__date", distinct=True)
-            )
-            .order_by("week")
-        )
+                for i in range(len(workout_days) - 1, 0, -1):
+                    current_day = workout_days[i]
+                    previous_day = workout_days[i - 1]
 
-        frequency = round(
-            sum(item["workouts"] for item in weekly_frequency)
-            / max(len(weekly_frequency), 1),
-            1,
-        )
-
-        # 💖 Recovery
-        recovery = 100
-
-        last_workout = queryset.order_by("-date").first()
-
-        if last_workout:
-            hours_since_workout = (
-                timezone.now() - last_workout.date
-            ).total_seconds() / 3600
-
-            recovery = min(int((hours_since_workout / 48) * 100), 100)
+                    if current_day - previous_day <= timedelta(days=2):
+                        streak += 1
+                    else:
+                        break
 
         data = {
-            "workouts": workouts,
+            "total_workouts": total_workouts,
+            "month_workouts": month_workouts,
             "streak": streak,
-            "frequency": round(frequency, 1),
-            "recovery": recovery,
+            "max_streak": max_streak,
         }
 
         return Response(data)
