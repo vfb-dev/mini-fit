@@ -117,20 +117,22 @@ export function ProgressChart() {
   const selectedMetricLabel =
     metric === "volume" ? t.volume : metric === "weight" ? t.weight : t.reps;
 
-  if (!chartData.length) {
-    return (
-      <div className="flex h-72 w-full flex-col items-center justify-center rounded-xl border border-dashed bg-zinc-50/50 px-4 text-center md:h-90 md:rounded-2xl">
-        <div className="mb-4 rounded-full bg-white p-3 shadow-sm md:p-4">
-          <Dumbbell className="size-5 text-zinc-400 md:size-6" />
-        </div>
-
-        <h3 className="text-sm font-semibold text-zinc-900">{t.emptyTitle}</h3>
-
-        <p className="mt-1 max-w-xs text-sm text-zinc-500">
-          {t.emptyDescription}
-        </p>
+  const emptyState = (
+    <div className="flex h-72 w-full flex-col items-center justify-center rounded-xl border border-dashed bg-zinc-50/50 px-4 text-center md:h-90 md:rounded-2xl">
+      <div className="mb-4 rounded-full bg-white p-3 shadow-sm md:p-4">
+        <Dumbbell className="size-5 text-zinc-400 md:size-6" />
       </div>
-    );
+
+      <h3 className="text-sm font-semibold text-zinc-900">{t.emptyTitle}</h3>
+
+      <p className="mt-1 max-w-xs text-sm text-zinc-500">
+        {t.emptyDescription}
+      </p>
+    </div>
+  );
+
+  if (!uniqueExercises.length) {
+    return emptyState;
   }
 
   return (
@@ -258,139 +260,143 @@ export function ProgressChart() {
       </div>
 
       {/* Chart */}
-      <div className="h-72 w-full md:h-90">
-        <ResponsiveBar
-          data={chartData}
-          keys={["value"]}
-          indexBy="label"
-          margin={{
-            top: isMobile ? 12 : 20,
-            right: isMobile ? 4 : 20,
-            bottom: 45,
-            left: isMobile ? 38 : 60,
-          }}
-          padding={getBarPadding(chartData.length)}
-          valueScale={{
-            type: "linear",
-            max: chartMax,
-          }}
-          indexScale={{ type: "band", round: true }}
-          borderRadius={4}
-          enableLabel={false}
-          colors={({ index }) => {
-            const start = [155, 223, 231]; // #9bdfe7
-            const end = [77, 151, 215]; // #4d97d7
+      {chartData.length ? (
+        <div className="h-72 w-full md:h-90">
+          <ResponsiveBar
+            data={chartData}
+            keys={["value"]}
+            indexBy="label"
+            margin={{
+              top: isMobile ? 12 : 20,
+              right: isMobile ? 4 : 20,
+              bottom: 45,
+              left: isMobile ? 38 : 60,
+            }}
+            padding={getBarPadding(chartData.length)}
+            valueScale={{
+              type: "linear",
+              max: chartMax,
+            }}
+            indexScale={{ type: "band", round: true }}
+            borderRadius={4}
+            enableLabel={false}
+            colors={({ index }) => {
+              const start = [155, 223, 231]; // #9bdfe7
+              const end = [77, 151, 215]; // #4d97d7
 
-            const factor =
-              chartData.length <= 1 ? 1 : index / (chartData.length - 1);
+              const factor =
+                chartData.length <= 1 ? 1 : index / (chartData.length - 1);
 
-            const r = Math.round(start[0] + (end[0] - start[0]) * factor);
-            const g = Math.round(start[1] + (end[1] - start[1]) * factor);
-            const b = Math.round(start[2] + (end[2] - start[2]) * factor);
+              const r = Math.round(start[0] + (end[0] - start[0]) * factor);
+              const g = Math.round(start[1] + (end[1] - start[1]) * factor);
+              const b = Math.round(start[2] + (end[2] - start[2]) * factor);
 
-            return `rgb(${r}, ${g}, ${b})`;
-          }}
-          animate
-          motionConfig="gentle"
-          theme={{
-            background: "transparent",
+              return `rgb(${r}, ${g}, ${b})`;
+            }}
+            animate
+            motionConfig="gentle"
+            theme={{
+              background: "transparent",
 
-            text: {
-              fill: "#9ca3af",
-              fontSize: isMobile ? 10 : 11,
-              fontFamily: "Inter, sans-serif",
-            },
+              text: {
+                fill: "#9ca3af",
+                fontSize: isMobile ? 10 : 11,
+                fontFamily: "Inter, sans-serif",
+              },
 
-            axis: {
-              domain: {
+              axis: {
+                domain: {
+                  line: {
+                    stroke: "transparent",
+                  },
+                },
+
+                ticks: {
+                  line: {
+                    stroke: "transparent",
+                  },
+
+                  text: {
+                    fill: "#9ca3af",
+                    fontSize: isMobile ? 10 : 11,
+                  },
+                },
+              },
+
+              grid: {
                 line: {
-                  stroke: "transparent",
+                  stroke: "#eceff1",
+                  strokeWidth: 1,
                 },
               },
 
-              ticks: {
-                line: {
-                  stroke: "transparent",
+              tooltip: {
+                container: {
+                  background: "white",
+                  color: "#111827",
+                  fontSize: 12,
+                  borderRadius: "10px",
+                  border: "1px solid #f1f5f9",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+                  padding: "8px 10px",
                 },
-
-                text: {
-                  fill: "#9ca3af",
-                  fontSize: isMobile ? 10 : 11,
-                },
               },
-            },
-
-            grid: {
-              line: {
-                stroke: "#eceff1",
-                strokeWidth: 1,
-              },
-            },
-
-            tooltip: {
-              container: {
-                background: "white",
-                color: "#111827",
-                fontSize: 12,
-                borderRadius: "10px",
-                border: "1px solid #f1f5f9",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-                padding: "8px 10px",
-              },
-            },
-          }}
-          axisTop={null}
-          axisRight={null}
-          axisBottom={{
-            tickSize: 0,
-            tickPadding: isMobile ? 8 : 12,
-            tickRotation: isMobile ? -45 : chartData.length > 7 ? -25 : 0,
-            tickValues: visibleTicks,
-          }}
-          axisLeft={{
-            tickSize: 0,
-            tickPadding: 10,
-            tickValues: 5,
-            format: (value) => formatChartNumber(Number(value)),
-          }}
-          enableGridY
-          gridYValues={5}
-          tooltip={({ value, color, data }) => (
-            <div className="min-w-32 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-xl">
-              {/* date */}
-              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
-                {data.tooltip_label}
-              </p>
-
-              {/* main value */}
-              <div className="mt-2 flex items-center gap-2">
-                <div
-                  className="size-2 rounded-full"
-                  style={{ backgroundColor: color }}
-                />
-
-                <span className="text-xl font-bold text-zinc-900">
-                  {Number(value).toLocaleString()}
-                </span>
-              </div>
-
-              {/* metric */}
-              <p className="mt-1 text-xs text-zinc-500">
-                {metric === "volume" && t.trainingVolume}
-                {metric === "weight" && t.maxWeight}
-                {metric === "reps" && t.totalReps}
-              </p>
-
-              {/* exercise */}
-              <div className="mt-3 border-t border-zinc-100 pt-2">
-                <p className="text-xs font-medium text-zinc-700">
-                  {toTitleCase(selectedExercise)}
+            }}
+            axisTop={null}
+            axisRight={null}
+            axisBottom={{
+              tickSize: 0,
+              tickPadding: isMobile ? 8 : 12,
+              tickRotation: isMobile ? -45 : chartData.length > 7 ? -25 : 0,
+              tickValues: visibleTicks,
+            }}
+            axisLeft={{
+              tickSize: 0,
+              tickPadding: 10,
+              tickValues: 5,
+              format: (value) => formatChartNumber(Number(value)),
+            }}
+            enableGridY
+            gridYValues={5}
+            tooltip={({ value, color, data }) => (
+              <div className="min-w-32 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-xl">
+                {/* date */}
+                <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+                  {data.tooltip_label}
                 </p>
+
+                {/* main value */}
+                <div className="mt-2 flex items-center gap-2">
+                  <div
+                    className="size-2 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+
+                  <span className="text-xl font-bold text-zinc-900">
+                    {Number(value).toLocaleString()}
+                  </span>
+                </div>
+
+                {/* metric */}
+                <p className="mt-1 text-xs text-zinc-500">
+                  {metric === "volume" && t.trainingVolume}
+                  {metric === "weight" && t.maxWeight}
+                  {metric === "reps" && t.totalReps}
+                </p>
+
+                {/* exercise */}
+                <div className="mt-3 border-t border-zinc-100 pt-2">
+                  <p className="text-xs font-medium text-zinc-700">
+                    {toTitleCase(selectedExercise)}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-        />
-      </div>
+            )}
+          />
+        </div>
+      ) : (
+        emptyState
+      )}
     </>
   );
 }
