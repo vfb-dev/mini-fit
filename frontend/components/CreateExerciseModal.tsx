@@ -92,7 +92,7 @@ export function CreateExerciseModal() {
   function onSubmit(formData: FormData) {
     createMutation.mutate({
       ...formData,
-      date: new Date(formData.date).toISOString(),
+      date: formData.date,
     });
   }
 
