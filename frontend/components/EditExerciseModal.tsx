@@ -1,31 +1,44 @@
 "use client";
 
-import { CalendarClock, Dumbbell, Hash, Loader2, Scale, X } from "lucide-react";
+import { CalendarClock, Hash, Loader2, Scale, X } from "lucide-react";
 import { useEffect, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { useModalStore } from "@/store/modalStore";
 
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { updateExercise } from "@/services/exercises";
+import {
+  updateExerciseSet,
+  type ExerciseSet,
+  type ExerciseSetPayload,
+} from "@/services/exerciseSets";
+import { getExerciseOptions, type Exercise } from "@/services/exercises";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { translations } from "@/lib/translations";
 import { useLanguageStore } from "@/store/languageStore";
 
 type Translation = (typeof translations)[keyof typeof translations];
 
-function createExerciseSchema(t: Translation) {
+function createExerciseSetSchema(t: Translation) {
   return z.object({
     date: z.string().min(1, t.common.required),
-    name: z.string().min(1, t.common.required),
+    exercise: z.string().min(1, t.dashboard.exerciseModal.selectExercise),
     reps: z.number().min(1, t.dashboard.exerciseModal.minimumOneRep),
     weight: z
       .number()
@@ -34,33 +47,84 @@ function createExerciseSchema(t: Translation) {
   });
 }
 
-type FormData = z.infer<ReturnType<typeof createExerciseSchema>>;
-
-type Exercise = {
-  id: number;
-  date: string;
-  name: string;
-  reps: number;
-  weight: number;
-};
+type FormData = z.infer<ReturnType<typeof createExerciseSetSchema>>;
 
 type EditModalProps = {
-  selectedExercise: Exercise | null;
+  selectedExercise: ExerciseSet | null;
 };
 
 type UpdateExerciseData = {
   id: number;
-  exerciseData: FormData;
+  exerciseData: ExerciseSetPayload;
 };
+
+function toTitleCase(text: string) {
+  return text.replace(/\w\S*/g, (word) => {
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+}
+
+function normalizeExerciseName(text: string) {
+  return text.trim().toLowerCase();
+}
 
 export function EditExerciseModal({ selectedExercise }: EditModalProps) {
   const { editModal, handleEditModal } = useModalStore();
   const queryClient = useQueryClient();
   const { language } = useLanguageStore();
   const t = translations[language];
-  const schema = useMemo(() => createExerciseSchema(t), [t]);
+  const schema = useMemo(() => createExerciseSetSchema(t), [t]);
+
+  const { data: exerciseOptions = [] } = useQuery<Exercise[]>({
+    queryKey: ["exercise_options"],
+    queryFn: () => getExerciseOptions(),
+    enabled: editModal,
+  });
+
+  const selectedExerciseId = useMemo(() => {
+    if (!selectedExercise) {
+      return "";
+    }
+
+    if (selectedExercise.exercise != null) {
+      return String(selectedExercise.exercise);
+    }
+
+    const matchingExercise = exerciseOptions.find(
+      (exercise) =>
+        normalizeExerciseName(exercise.name) ===
+        normalizeExerciseName(selectedExercise.name),
+    );
+
+    return matchingExercise ? String(matchingExercise.id) : "";
+  }, [exerciseOptions, selectedExercise]);
+
+  const exerciseSelectOptions = useMemo(() => {
+    if (!selectedExercise || !selectedExerciseId) {
+      return exerciseOptions;
+    }
+
+    const hasSelectedExercise = exerciseOptions.some(
+      (exercise) => String(exercise.id) === selectedExerciseId,
+    );
+
+    if (hasSelectedExercise) {
+      return exerciseOptions;
+    }
+
+    return [
+      {
+        id: Number(selectedExerciseId),
+        name: selectedExercise.name,
+        primary_body_part: "",
+        secondary_body_parts: [],
+      },
+      ...exerciseOptions,
+    ];
+  }, [exerciseOptions, selectedExercise, selectedExerciseId]);
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -69,30 +133,30 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
     resolver: zodResolver(schema),
     defaultValues: {
       date: "",
-      name: "",
+      exercise: "",
       reps: 0,
       weight: 0,
     },
   });
 
   useEffect(() => {
-    if (selectedExercise) {
+    if (editModal && selectedExercise && selectedExerciseId) {
       reset({
-        name: selectedExercise.name,
+        exercise: selectedExerciseId,
         reps: selectedExercise.reps,
         weight: Number(selectedExercise.weight),
         date: selectedExercise.date.slice(0, 16),
       });
     }
-  }, [selectedExercise, reset]);
+  }, [editModal, selectedExercise, selectedExerciseId, reset]);
 
   const updateMutation = useMutation({
     mutationFn: ({ id, exerciseData }: UpdateExerciseData) =>
-      updateExercise(id, exerciseData),
+      updateExerciseSet(id, exerciseData),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["exercises"],
+        queryKey: ["exercise_sets"],
       });
 
       await queryClient.invalidateQueries({
@@ -100,7 +164,7 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["unique_exercises"],
+        queryKey: ["exercises"],
       });
 
       await queryClient.invalidateQueries({
@@ -122,8 +186,10 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
     updateMutation.mutate({
       id: selectedExercise.id,
       exerciseData: {
-        ...formData,
+        exercise: Number(formData.exercise),
         date: formData.date,
+        reps: formData.reps,
+        weight: formData.weight,
       },
     });
   }
@@ -201,19 +267,40 @@ export function EditExerciseModal({ selectedExercise }: EditModalProps) {
                 >
                   {t.common.exercise}
                 </Label>
-                <div className="relative">
-                  <Dumbbell className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-                  <Input
-                    id="exercise"
-                    type="text"
-                    placeholder="Push Ups"
-                    className="h-11 rounded-xl pl-10"
-                    {...register("name")}
-                  />
-                </div>
-                {errors.name && (
+                <Controller
+                  control={control}
+                  name="exercise"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        id="exercise"
+                        className="h-11 w-full cursor-pointer rounded-xl"
+                      >
+                        <SelectValue
+                          placeholder={t.dashboard.exerciseModal.selectExercise}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {exerciseSelectOptions.map((exercise) => (
+                            <SelectItem
+                              key={exercise.id}
+                              value={String(exercise.id)}
+                            >
+                              {toTitleCase(exercise.name)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.exercise && (
                   <p className="text-sm font-medium text-red-500">
-                    {errors.name.message}
+                    {errors.exercise.message}
                   </p>
                 )}
               </div>

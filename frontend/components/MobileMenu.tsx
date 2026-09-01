@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ChartColumn,
+  Dumbbell,
   User,
   LogIn,
   UserPlus,
@@ -120,6 +121,17 @@ export function MobileMenu() {
 
           {loading ? null : user ? (
             <>
+              {/* Exercises */}
+              <Link
+                href="/exercises"
+                onClick={closeMenu}
+                className="group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium text-zinc-500 transition-all duration-300 hover:bg-zinc-100 hover:text-black"
+              >
+                <Dumbbell className="size-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+
+                <span>{t.nav.exercises}</span>
+              </Link>
+
               {/* Account */}
               <Link
                 href="/account"

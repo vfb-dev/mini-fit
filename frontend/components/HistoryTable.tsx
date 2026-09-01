@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { MoreHorizontal, NotebookPen } from "lucide-react";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { CreateExerciseModal } from "@/components/CreateExerciseModal";
 import { EditExerciseModal } from "@/components/EditExerciseModal";
@@ -37,25 +37,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/modalStore";
-import { getExercises, deleteExercise } from "@/services/exercises";
+import {
+  deleteExerciseSet,
+  getExerciseSets,
+  type ExerciseSet,
+  type ExerciseSetsResponse,
+} from "@/services/exerciseSets";
 import { translations } from "@/lib/translations";
 import { useLanguageStore } from "@/store/languageStore";
-
-type Exercise = {
-  id: number;
-  date: string;
-  formatted_date: string;
-  name: string;
-  reps: number;
-  weight: number;
-};
-
-type ExercisesResponse = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Exercise[];
-};
 
 const PAGE_SIZE = 10;
 
@@ -72,13 +61,13 @@ export function HistoryTable() {
   const t = translations[language].dashboard.history;
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseSet | null>(
     null,
   );
 
-  const { data, isLoading } = useQuery<ExercisesResponse>({
-    queryKey: ["exercises", currentPage],
-    queryFn: () => getExercises(currentPage),
+  const { data, isLoading } = useQuery<ExerciseSetsResponse>({
+    queryKey: ["exercise_sets", currentPage],
+    queryFn: () => getExerciseSets(currentPage),
     placeholderData: (previousData) => previousData,
   });
 
@@ -93,7 +82,7 @@ export function HistoryTable() {
   const totalPages = Math.ceil(paginationInfo.count / PAGE_SIZE);
 
   const deleteMutation = useMutation({
-    mutationFn: deleteExercise,
+    mutationFn: deleteExerciseSet,
 
     onSuccess: async () => {
       const isLastItemOnPage = exercises.length === 1;
@@ -103,11 +92,15 @@ export function HistoryTable() {
       }
 
       await queryClient.invalidateQueries({
-        queryKey: ["exercises"],
+        queryKey: ["exercise_sets"],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["unique_exercises"],
+        queryKey: ["history"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["exercises"],
       });
 
       await queryClient.invalidateQueries({
@@ -129,7 +122,7 @@ export function HistoryTable() {
       <CreateExerciseModal />
       <EditExerciseModal selectedExercise={selectedExercise} />
 
-      <div className="flex justify-between mb-4">
+      <div className="mb-4 flex justify-between">
         <h3 className="text-lg font-semibold">{t.title}</h3>
 
         <Button
@@ -234,7 +227,6 @@ export function HistoryTable() {
           {Array.from({ length: totalPages }, (_, index) => {
             const page = index + 1;
 
-            // beginning pages
             if (currentPage <= 4) {
               if (page <= 4 || page === totalPages) {
                 return (
@@ -261,7 +253,6 @@ export function HistoryTable() {
               return null;
             }
 
-            // ending pages
             if (currentPage > totalPages - 4) {
               if (page === 1 || page >= totalPages - 3) {
                 return (

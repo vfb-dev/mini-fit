@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Exercise
+from .models import BodyPart, Exercise, ExerciseSet
 
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -12,17 +12,116 @@ from users.tokens import password_reset_token
 
 User = get_user_model()
 
+VALID_BODY_PARTS = {value for value, _ in BodyPart.choices}
+
+
 class ExerciseSerializer(serializers.ModelSerializer):
-    formatted_date = serializers.SerializerMethodField()
+    set_count = serializers.IntegerField(read_only=True)
+    last_logged_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Exercise
-        fields = "__all__"
+        fields = [
+            "id",
+            "name",
+            "primary_body_part",
+            "secondary_body_parts",
+            "set_count",
+            "last_logged_at",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["user", "created_at", "updated_at"]
 
     def validate_name(self, value):
-        return value.strip().lower()
-    
+        name = value.strip().lower()
+
+        if not name:
+            raise serializers.ValidationError("Exercise name is required.")
+
+        request = self.context.get("request")
+
+        if request and request.user.is_authenticated:
+            queryset = Exercise.objects.filter(user=request.user, name=name)
+
+            if self.instance:
+                queryset = queryset.exclude(pk=self.instance.pk)
+
+            if queryset.exists():
+                raise serializers.ValidationError("Exercise already exists.")
+
+        return name
+
+    def validate_secondary_body_parts(self, value):
+        if value in (None, ""):
+            return []
+
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Secondary body parts must be a list.")
+
+        body_parts = []
+        for item in value:
+            if not isinstance(item, str):
+                raise serializers.ValidationError("Body parts must be text values.")
+
+            body_part = item.strip().lower()
+
+            if body_part not in VALID_BODY_PARTS:
+                raise serializers.ValidationError(f"Invalid body part: {item}")
+
+            if body_part not in body_parts:
+                body_parts.append(body_part)
+
+        return body_parts
+
+    def validate(self, attrs):
+        primary_body_part = attrs.get(
+            "primary_body_part",
+            self.instance.primary_body_part if self.instance else "",
+        )
+        secondary_body_parts = attrs.get(
+            "secondary_body_parts",
+            self.instance.secondary_body_parts if self.instance else [],
+        )
+
+        if primary_body_part:
+            secondary_body_parts = [
+                body_part
+                for body_part in secondary_body_parts
+                if body_part != primary_body_part
+            ]
+
+        attrs["secondary_body_parts"] = secondary_body_parts
+        return attrs
+
+
+class ExerciseSetSerializer(serializers.ModelSerializer):
+    formatted_date = serializers.SerializerMethodField()
+    name = serializers.CharField(source="exercise.name", read_only=True)
+
+    class Meta:
+        model = ExerciseSet
+        fields = [
+            "id",
+            "exercise",
+            "name",
+            "date",
+            "formatted_date",
+            "reps",
+            "weight",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["user", "created_at", "updated_at"]
+
+    def validate_exercise(self, value):
+        request = self.context.get("request")
+
+        if request and value.user_id != request.user.id:
+            raise serializers.ValidationError("Exercise not found.")
+
+        return value
+
     def get_formatted_date(self, obj):
         now = timezone.localtime()
         date = timezone.localtime(obj.date)
@@ -33,7 +132,8 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
         # Different year → 15 Dec 2025
         return date.strftime("%d %b %Y")
-    
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,

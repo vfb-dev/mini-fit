@@ -24,30 +24,18 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteExercise } from "@/services/exercises";
+import {
+  deleteExerciseSet,
+  type ExerciseSet,
+  type ExerciseSetGroup,
+} from "@/services/exerciseSets";
 import { translations } from "@/lib/translations";
 import { useLanguageStore } from "@/store/languageStore";
 import { useModalStore } from "@/store/modalStore";
 
-type Exercise = {
-  id: number;
-  name: string;
-  date: string;
-  reps: number;
-  weight: number;
-};
-
-type ExerciseGroup = {
-  group_id: string;
-  name: string;
-  date: string;
-  sets: number;
-  exercises: Exercise[];
-};
-
 type ExerciseTileProps = {
-  exercise: ExerciseGroup;
-  handleSelectedExercise: (ex: Exercise) => void;
+  exercise: ExerciseSetGroup;
+  handleSelectedExercise: (ex: ExerciseSet) => void;
 };
 
 function toTitleCase(text: string) {
@@ -69,7 +57,7 @@ export function ExerciseTile({
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
-    mutationFn: deleteExercise,
+    mutationFn: deleteExerciseSet,
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -77,7 +65,11 @@ export function ExerciseTile({
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["unique_exercises"],
+        queryKey: ["exercise_sets"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["exercises"],
       });
 
       await queryClient.invalidateQueries({

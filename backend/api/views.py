@@ -2,9 +2,10 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Exercise
+from .models import Exercise, ExerciseSet
 from .serializers import (
     ExerciseSerializer,
+    ExerciseSetSerializer,
     LoginSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
@@ -12,7 +13,7 @@ from .serializers import (
 )
 from .pagination import ExercisePagination
 
-from django.db.models import Sum, Max, F
+from django.db.models import Count, Sum, Max, F
 from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 from datetime import timedelta
 from django.utils import timezone
@@ -41,46 +42,102 @@ class ExerciseViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Exercise.objects.filter(user=self.request.user).order_by("-date")
+        queryset = (
+            Exercise.objects
+            .filter(user=self.request.user)
+            .annotate(
+                set_count=Count("sets"),
+                last_logged_at=Max("sets__date"),
+            )
+        )
+
+        search = self.request.query_params.get("search", "").strip()
+
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+
+        return queryset.order_by("name")
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        exercise = self.get_object()
+
+        if exercise.sets.exists():
+            return Response(
+                {"detail": "Cannot delete an exercise that has logged sets."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return super().destroy(request, *args, **kwargs)
+
     @action(detail=False, methods=["get"])
-    def unique_exercises(self, request):
-        exercises = (self.get_queryset().values_list("name", flat=True).distinct().order_by("name"))
+    def options(self, request):
+        exercises = self.get_queryset().values(
+            "id",
+            "name",
+            "primary_body_part",
+            "secondary_body_parts",
+        )
 
         return Response(exercises)
+
+
+class ExerciseSetViewset(viewsets.ModelViewSet):
+    serializer_class = ExerciseSetSerializer
+    pagination_class = ExercisePagination
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            ExerciseSet.objects
+            .filter(user=self.request.user)
+            .select_related("exercise")
+            .order_by("-date")
+        )
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
     
     @action(detail=False, methods=["get"])
     def history(self, request):
         search = request.query_params.get("search")
 
-        exercises = self.get_queryset().only("id","name","date","weight","reps")
+        exercise_sets = self.get_queryset().only(
+            "id",
+            "exercise",
+            "exercise__name",
+            "date",
+            "weight",
+            "reps",
+        )
 
         if search:
-            exercises = self.get_queryset().filter(name__icontains=search).only("id","name","date","weight","reps")
+            exercise_sets = exercise_sets.filter(exercise__name__icontains=search)
 
         grouped = {}
 
-        for exercise in exercises:
-            key = (exercise.name, exercise.date.date())
+        for exercise_set in exercise_sets:
+            key = (exercise_set.exercise_id, exercise_set.date.date())
 
             if key not in grouped:
                 grouped[key] = {
-                    "group_id": f"{exercise.name}-{exercise.date.date()}",
-                    "name": exercise.name,
-                    "date":exercise.date.strftime("%b %d"), 
+                    "group_id": f"{exercise_set.exercise_id}-{exercise_set.date.date()}",
+                    "exercise": exercise_set.exercise_id,
+                    "name": exercise_set.exercise.name,
+                    "date": exercise_set.date.strftime("%b %d"), 
                     "sets": 0 , 
                     "exercises":[]}
 
             grouped[key]["sets"] += 1
             grouped[key]["exercises"].append({
-                "id": exercise.id,
-                "name": exercise.name,
-                "date": exercise.date,
-                "weight": exercise.weight,
-                "reps": exercise.reps,
+                "id": exercise_set.id,
+                "exercise": exercise_set.exercise_id,
+                "name": exercise_set.exercise.name,
+                "date": exercise_set.date,
+                "weight": exercise_set.weight,
+                "reps": exercise_set.reps,
             })
 
             for group in grouped.values():
@@ -107,7 +164,7 @@ class ExerciseViewset(viewsets.ModelViewSet):
 
         # filter exercise
         if exercise:
-            queryset = queryset.filter(name=exercise)
+            queryset = queryset.filter(exercise_id=exercise)
 
         # filter period
         now = timezone.now()

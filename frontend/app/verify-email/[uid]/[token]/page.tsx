@@ -21,13 +21,7 @@ export default function VerifyEmailPage() {
   const hasInvalidLink = !uid || !token;
 
   const [status, setStatus] = useState<VerifyStatus>("loading");
-  const [message, setMessage] = useState<string>(t.initialMessage);
-
-  useEffect(() => {
-    if (status === "loading") {
-      setMessage(t.initialMessage);
-    }
-  }, [status, t.initialMessage]);
+  const [message, setMessage] = useState<string>("");
 
   useEffect(() => {
     if (hasInvalidLink) return;
@@ -73,7 +67,11 @@ export default function VerifyEmailPage() {
   ]);
 
   const viewStatus: VerifyStatus = hasInvalidLink ? "error" : status;
-  const viewMessage = hasInvalidLink ? t.invalidLink : message;
+  const viewMessage = hasInvalidLink
+    ? t.invalidLink
+    : status === "loading"
+      ? t.initialMessage
+      : message;
 
   return (
     <main className="flex items-center justify-center px-4">

@@ -2,44 +2,71 @@ import { apiFetch } from "./wrapper";
 
 import { apiUrl } from "@/lib/api";
 
-export async function getExercises(page = 1) {
-  const response = await apiFetch(apiUrl(`/api/v1/exercises/?page=${page}`));
+export type Exercise = {
+  id: number;
+  name: string;
+  primary_body_part: string;
+  secondary_body_parts: string[];
+  set_count?: number;
+  last_logged_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
 
-  if (!response.ok) {
-    throw new Error("Failed to Fetch Exercises");
-  }
+export type ExercisesResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Exercise[];
+};
 
-  return response.json();
-}
+export type ExercisePayload = {
+  name: string;
+  primary_body_part: string;
+  secondary_body_parts: string[];
+};
 
-type HistoryParams = { page?: number; search?: string };
-export async function getExercisesHistory({
+type GetExercisesParams = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+};
+
+export async function getExercises({
   page = 1,
+  pageSize,
   search,
-}: HistoryParams = {}) {
+}: GetExercisesParams = {}) {
   const params = new URLSearchParams({ page: String(page) });
 
-  if (search) {
-    params.set("search", search);
+  if (pageSize) {
+    params.set("page_size", String(pageSize));
   }
 
-  const response = await apiFetch(
-    apiUrl(`/api/v1/exercises/history/?${params}`),
-  );
+  if (search?.trim()) {
+    params.set("search", search.trim());
+  }
+
+  const response = await apiFetch(apiUrl(`/api/v1/exercises/?${params}`));
 
   if (!response.ok) {
-    throw new Error("Failed to Fetch Exercises History");
+    throw new Error("Failed to fetch exercises");
   }
 
   return response.json();
 }
 
-export async function createExercise(exerciseData: {
-  date: string;
-  name: string;
-  reps: number;
-  weight: number;
-}) {
+export async function getExerciseOptions() {
+  const response = await apiFetch(apiUrl("/api/v1/exercises/options/"));
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch exercise options");
+  }
+
+  return response.json();
+}
+
+export async function createExercise(exerciseData: ExercisePayload) {
   const response = await apiFetch(apiUrl("/api/v1/exercises/"), {
     method: "POST",
     headers: {
@@ -49,7 +76,7 @@ export async function createExercise(exerciseData: {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create");
+    throw new Error("Failed to create exercise");
   }
 
   return response.json();
@@ -57,12 +84,7 @@ export async function createExercise(exerciseData: {
 
 export async function updateExercise(
   id: number,
-  exerciseData: {
-    date: string;
-    name: string;
-    reps: number;
-    weight: number;
-  },
+  exerciseData: ExercisePayload,
 ) {
   const response = await apiFetch(apiUrl(`/api/v1/exercises/${id}/`), {
     method: "PUT",
@@ -71,6 +93,10 @@ export async function updateExercise(
     },
     body: JSON.stringify(exerciseData),
   });
+
+  if (!response.ok) {
+    throw new Error("Failed to update exercise");
+  }
 
   return response.json();
 }
@@ -81,6 +107,7 @@ export async function deleteExercise(id: number) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to delete");
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.detail ?? "Failed to delete exercise");
   }
 }

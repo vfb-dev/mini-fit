@@ -30,7 +30,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 
 import { useQuery } from "@tanstack/react-query";
-import { get_unique_exercises, get_chart_data } from "@/services/chart";
+import { get_chart_data } from "@/services/chart";
+import { getExerciseOptions, type Exercise } from "@/services/exercises";
 import { translations } from "@/lib/translations";
 import { useLanguageStore } from "@/store/languageStore";
 
@@ -65,28 +66,38 @@ export function ProgressChart() {
   const { language } = useLanguageStore();
   const t = translations[language].dashboard.chart;
 
-  const [exercise, setExercise] = useState<string>("");
+  const [exerciseId, setExerciseId] = useState<string>("");
   const [period, setPeriod] = useState<string>("30D");
   const [metric, setMetric] = useState<string>("volume");
 
-  const { data: uniqueExercises = [] } = useQuery<string[]>({
-    queryKey: ["unique_exercises"],
-    queryFn: () => get_unique_exercises(),
+  const { data: exerciseOptions = [] } = useQuery<Exercise[]>({
+    queryKey: ["exercise_options"],
+    queryFn: () => getExerciseOptions(),
   });
 
-  const selectedExercise = exercise || uniqueExercises[0] || "";
+  const hasSelectedExercise = exerciseOptions.some(
+    (exercise) => String(exercise.id) === exerciseId,
+  );
+  const selectedExerciseId = hasSelectedExercise
+    ? exerciseId
+    : String(exerciseOptions[0]?.id ?? "");
+  const selectedExercise = exerciseOptions.find(
+    (exercise) => String(exercise.id) === selectedExerciseId,
+  );
+  const selectedExerciseName = selectedExercise?.name ?? "";
 
   const { data: chartData = [] } = useQuery<ChartData[]>({
-    queryKey: ["chart", selectedExercise, metric, period],
+    queryKey: ["chart", selectedExerciseId, metric, period],
 
     queryFn: () =>
       get_chart_data({
-        exercise: selectedExercise,
+        exercise: selectedExerciseId,
         metric,
         period,
       }),
 
     placeholderData: (previousData) => previousData,
+    enabled: Boolean(selectedExerciseId),
   });
 
   const maxChartValue = Math.max(...chartData.map((item) => item.value), 0);
@@ -131,7 +142,7 @@ export function ProgressChart() {
     </div>
   );
 
-  if (!uniqueExercises.length) {
+  if (!exerciseOptions.length) {
     return emptyState;
   }
 
@@ -143,7 +154,7 @@ export function ProgressChart() {
             <h3 className="text-lg font-semibold">{t.progress}</h3>
 
             <p className="mt-1 truncate text-xs text-zinc-500 sm:max-w-sm">
-              {toTitleCase(selectedExercise)} - {selectedMetricLabel}
+              {toTitleCase(selectedExerciseName)} - {selectedMetricLabel}
             </p>
           </div>
 
@@ -193,17 +204,20 @@ export function ProgressChart() {
                   <Field className="gap-2">
                     <FieldLabel htmlFor="exercise">{t.exercise}</FieldLabel>
                     <Select
-                      value={selectedExercise}
-                      onValueChange={(value) => setExercise(value)}
+                      value={selectedExerciseId}
+                      onValueChange={(value) => setExerciseId(value)}
                     >
                       <SelectTrigger className="w-full cursor-pointer">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          {uniqueExercises.map((exercise) => (
-                            <SelectItem key={exercise} value={exercise}>
-                              {toTitleCase(exercise)}
+                          {exerciseOptions.map((exercise) => (
+                            <SelectItem
+                              key={exercise.id}
+                              value={String(exercise.id)}
+                            >
+                              {toTitleCase(exercise.name)}
                             </SelectItem>
                           ))}
                         </SelectGroup>
@@ -387,7 +401,7 @@ export function ProgressChart() {
                 {/* exercise */}
                 <div className="mt-3 border-t border-zinc-100 pt-2">
                   <p className="text-xs font-medium text-zinc-700">
-                    {toTitleCase(selectedExercise)}
+                    {toTitleCase(selectedExerciseName)}
                   </p>
                 </div>
               </div>

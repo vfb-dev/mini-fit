@@ -1,21 +1,69 @@
 from django.db import models
-from django.utils import timezone
 from django.conf import settings
 
-# Create your models here.
+
+class BodyPart(models.TextChoices):
+    CHEST = "chest", "Chest"
+    BACK = "back", "Back"
+    SHOULDERS = "shoulders", "Shoulders"
+    BICEPS = "biceps", "Biceps"
+    TRICEPS = "triceps", "Triceps"
+    LEGS = "legs", "Legs"
+    GLUTES = "glutes", "Glutes"
+    CORE = "core", "Core"
+    CARDIO = "cardio", "Cardio"
+    FULL_BODY = "full_body", "Full body"
+    OTHER = "other", "Other"
+
+
 class Exercise(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="exercises",
+        related_name="exercise_catalog",
     )
-
-    date = models.DateTimeField()
     name = models.CharField(max_length=100)
-    reps = models.IntegerField()
+    primary_body_part = models.CharField(
+        max_length=40,
+        choices=BodyPart.choices,
+        blank=True,
+    )
+    secondary_body_parts = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "name"],
+                name="unique_exercise_name_per_user",
+            )
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class ExerciseSet(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="exercise_sets",
+    )
+    exercise = models.ForeignKey(
+        Exercise,
+        on_delete=models.PROTECT,
+        related_name="sets",
+    )
+    date = models.DateTimeField()
+    reps = models.PositiveIntegerField()
     weight = models.DecimalField(max_digits=6, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ["-date"]
+
     def __str__(self):
-        return f"{self.name} ({self.reps} reps @ {self.weight}kg)"
+        return f"{self.exercise.name} ({self.reps} reps @ {self.weight}kg)"

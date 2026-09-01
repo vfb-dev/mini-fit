@@ -2,7 +2,11 @@ import { NotebookPen, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { getExercisesHistory } from "@/services/exercises";
+import {
+  getExerciseSetHistory,
+  type ExerciseSet,
+  type ExerciseSetHistoryResponse,
+} from "@/services/exerciseSets";
 import { ExerciseTile } from "./ExerciseTile";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -12,30 +16,7 @@ import { CreateExerciseModal } from "@/components/CreateExerciseModal";
 import { EditExerciseModal } from "@/components/EditExerciseModal";
 import { useModalStore } from "@/store/modalStore";
 
-type Exercise = {
-  id: number;
-  name: string;
-  date: string;
-  reps: number;
-  weight: number;
-};
-
-type ExerciseGroup = {
-  group_id: string;
-  name: string;
-  date: string;
-  sets: number;
-  exercises: Exercise[];
-};
-
-type ExercisesResponse = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: ExerciseGroup[];
-};
-
-function getNextHistoryPage(lastPage: ExercisesResponse) {
+function getNextHistoryPage(lastPage: ExerciseSetHistoryResponse) {
   if (!lastPage.next) return undefined;
 
   const nextUrl = new URL(lastPage.next, window.location.origin);
@@ -47,17 +28,17 @@ function getNextHistoryPage(lastPage: ExercisesResponse) {
 export function Tiles() {
   const { handleCreateModal } = useModalStore();
   const [userSearch, setUserSearch] = useState<string>("");
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseSet | null>(
     null,
   );
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery<ExercisesResponse>({
+    useInfiniteQuery<ExerciseSetHistoryResponse>({
       queryKey: ["history", userSearch],
       queryFn: ({ pageParam }) =>
-        getExercisesHistory({
+        getExerciseSetHistory({
           page: Number(pageParam),
           search: userSearch,
         }),
