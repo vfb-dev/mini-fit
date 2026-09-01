@@ -24,18 +24,10 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SimplePagination } from "@/components/SimplePagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -68,7 +60,6 @@ const EMPTY_FORM: RoutinePayload = {
 
 type RoutinePageTranslation =
   (typeof translations)[keyof typeof translations]["routinePage"];
-type PaginationItemValue = number | "start-ellipsis" | "end-ellipsis";
 
 function toTitleCase(text: string) {
   return text.replace(/\w\S*/g, (word) => {
@@ -80,46 +71,6 @@ function parsePositiveInteger(value: string) {
   const parsed = Number.parseInt(value, 10);
 
   return Number.isNaN(parsed) ? 0 : parsed;
-}
-
-function getPaginationItems(
-  currentPage: number,
-  totalPages: number,
-): PaginationItemValue[] {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
-  }
-
-  let start = Math.max(2, currentPage - 1);
-  let end = Math.min(totalPages - 1, currentPage + 1);
-
-  if (currentPage <= 3) {
-    start = 2;
-    end = 4;
-  }
-
-  if (currentPage >= totalPages - 2) {
-    start = totalPages - 3;
-    end = totalPages - 1;
-  }
-
-  const pages: PaginationItemValue[] = [1];
-
-  if (start > 2) {
-    pages.push("start-ellipsis");
-  }
-
-  for (let page = start; page <= end; page += 1) {
-    pages.push(page);
-  }
-
-  if (end < totalPages - 1) {
-    pages.push("end-ellipsis");
-  }
-
-  pages.push(totalPages);
-
-  return pages;
 }
 
 function formatTarget(
@@ -174,7 +125,6 @@ export default function RoutinesPage() {
   const routines = data?.results ?? [];
   const totalCount = data?.count ?? 0;
   const totalPages = Math.max(Math.ceil(totalCount / PAGE_SIZE), 1);
-  const paginationItems = getPaginationItems(currentPage, totalPages);
   const hasSearch = search.length > 0;
   const firstResult = totalCount ? (currentPage - 1) * PAGE_SIZE + 1 : 0;
   const lastResult = Math.min(currentPage * PAGE_SIZE, totalCount);
@@ -621,69 +571,14 @@ export default function RoutinesPage() {
                 {t.showing} {firstResult}-{lastResult} {t.of} {totalCount}
               </p>
 
-              <Pagination className="mx-0 justify-end overflow-x-auto">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      text={t.previous}
-                      aria-disabled={!data?.previous}
-                      className={
-                        !data?.previous
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                      onClick={(event) => {
-                        event.preventDefault();
-                        handlePageChange(currentPage - 1);
-                      }}
-                    />
-                  </PaginationItem>
-
-                  {paginationItems.map((item) => {
-                    if (typeof item !== "number") {
-                      return (
-                        <PaginationItem key={item}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      );
-                    }
-
-                    return (
-                      <PaginationItem key={item}>
-                        <PaginationLink
-                          href="#"
-                          className="cursor-pointer"
-                          isActive={currentPage === item}
-                          onClick={(event) => {
-                            event.preventDefault();
-                            handlePageChange(item);
-                          }}
-                        >
-                          {item}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  })}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      text={t.next}
-                      aria-disabled={!data?.next}
-                      className={
-                        !data?.next
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                      onClick={(event) => {
-                        event.preventDefault();
-                        handlePageChange(currentPage + 1);
-                      }}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+              <SimplePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                previousLabel={t.previous}
+                nextLabel={t.next}
+                className="justify-end sm:w-auto"
+                onPageChange={handlePageChange}
+              />
             </div>
           )}
         </section>

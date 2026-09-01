@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { CreateExerciseModal } from "@/components/CreateExerciseModal";
 import { EditExerciseModal } from "@/components/EditExerciseModal";
+import { SimplePagination } from "@/components/SimplePagination";
 
 import {
   DropdownMenu,
@@ -24,16 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/store/modalStore";
@@ -79,7 +70,7 @@ export function HistoryTable() {
     previous: data?.previous ?? null,
   };
 
-  const totalPages = Math.ceil(paginationInfo.count / PAGE_SIZE);
+  const totalPages = Math.max(Math.ceil(paginationInfo.count / PAGE_SIZE), 1);
 
   const deleteMutation = useMutation({
     mutationFn: deleteExerciseSet,
@@ -211,89 +202,13 @@ export function HistoryTable() {
         </TableBody>
       </Table>
 
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              className={
-                !paginationInfo.previous
-                  ? "pointer-events-none opacity-50"
-                  : "cursor-pointer"
-              }
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-            />
-          </PaginationItem>
-
-          {Array.from({ length: totalPages }, (_, index) => {
-            const page = index + 1;
-
-            if (currentPage <= 4) {
-              if (page <= 4 || page === totalPages) {
-                return (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      className="cursor-pointer"
-                      isActive={currentPage === page}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              }
-
-              if (page === 5) {
-                return (
-                  <PaginationItem key="ellipsis">
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                );
-              }
-
-              return null;
-            }
-
-            if (currentPage > totalPages - 4) {
-              if (page === 1 || page >= totalPages - 3) {
-                return (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      className="cursor-pointer"
-                      isActive={currentPage === page}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              }
-
-              if (page === 2) {
-                return (
-                  <PaginationItem key="ellipsis">
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                );
-              }
-
-              return null;
-            }
-
-            return null;
-          })}
-
-          <PaginationItem>
-            <PaginationNext
-              className={
-                !paginationInfo.next
-                  ? "pointer-events-none opacity-50"
-                  : "cursor-pointer"
-              }
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      <SimplePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        previousLabel={t.previous}
+        nextLabel={t.next}
+        onPageChange={setCurrentPage}
+      />
     </>
   );
 }

@@ -256,6 +256,8 @@ export const translations = {
         delete: "Delete",
         empty: "No exercises found.",
         loading: "Loading...",
+        previous: "Previous",
+        next: "Next",
       },
       exerciseModal: {
         createTitle: "Register workout",
@@ -534,6 +536,8 @@ export const translations = {
         delete: "Excluir",
         empty: "Nenhum exercício encontrado.",
         loading: "Carregando...",
+        previous: "Anterior",
+        next: "Próximo",
       },
       exerciseModal: {
         createTitle: "Registrar treino",
