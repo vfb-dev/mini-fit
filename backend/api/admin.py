@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Exercise, ExerciseSet
+from .models import Exercise, ExerciseSet, WorkoutRoutine, WorkoutRoutineExercise
 
 
 @admin.register(Exercise)
@@ -14,3 +14,18 @@ class ExerciseSetAdmin(admin.ModelAdmin):
     list_display = ("exercise", "reps", "weight", "date", "user")
     search_fields = ("exercise__name", "user__email", "user__username")
     list_filter = ("date",)
+
+
+class WorkoutRoutineExerciseInline(admin.TabularInline):
+    model = WorkoutRoutineExercise
+    extra = 0
+
+
+@admin.register(WorkoutRoutine)
+class WorkoutRoutineAdmin(admin.ModelAdmin):
+    list_display = ("name", "user", "exercise_total", "updated_at")
+    search_fields = ("name", "description", "user__email", "user__username")
+    inlines = [WorkoutRoutineExerciseInline]
+
+    def exercise_total(self, obj):
+        return obj.items.count()

@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Exercise, ExerciseSet
+from .models import Exercise, ExerciseSet, WorkoutRoutine
 from .serializers import (
     ExerciseSerializer,
     ExerciseSetSerializer,
@@ -10,6 +10,7 @@ from .serializers import (
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
     RegisterSerializer,
+    WorkoutRoutineSerializer,
 )
 from .pagination import ExercisePagination
 
@@ -35,6 +36,30 @@ from users.tokens import email_verification_token, password_reset_token
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+
+class WorkoutRoutineViewset(viewsets.ModelViewSet):
+    serializer_class = WorkoutRoutineSerializer
+    pagination_class = ExercisePagination
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = (
+            WorkoutRoutine.objects
+            .filter(user=self.request.user)
+            .prefetch_related("items__exercise")
+            .annotate(exercise_count=Count("items"))
+        )
+
+        search = self.request.query_params.get("search", "").strip()
+
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+
+        return queryset.order_by("name")
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class ExerciseViewset(viewsets.ModelViewSet):
     serializer_class = ExerciseSerializer

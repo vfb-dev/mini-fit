@@ -67,3 +67,57 @@ class ExerciseSet(models.Model):
 
     def __str__(self):
         return f"{self.exercise.name} ({self.reps} reps @ {self.weight}kg)"
+
+
+class WorkoutRoutine(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="workout_routines",
+    )
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "name"],
+                name="unique_routine_name_per_user",
+            )
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class WorkoutRoutineExercise(models.Model):
+    routine = models.ForeignKey(
+        WorkoutRoutine,
+        on_delete=models.CASCADE,
+        related_name="items",
+    )
+    exercise = models.ForeignKey(
+        Exercise,
+        on_delete=models.PROTECT,
+        related_name="routine_items",
+    )
+    order = models.PositiveIntegerField(default=0)
+    target_sets = models.PositiveIntegerField(default=3)
+    target_reps = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["routine", "exercise"],
+                name="unique_exercise_per_routine",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.routine.name}: {self.exercise.name}"

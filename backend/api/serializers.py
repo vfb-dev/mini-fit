@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import BodyPart, Exercise, ExerciseSet
+from .models import (
+    BodyPart,
+    Exercise,
+    ExerciseSet,
+    WorkoutRoutine,
+    WorkoutRoutineExercise,
+)
 
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -132,6 +138,143 @@ class ExerciseSetSerializer(serializers.ModelSerializer):
 
         # Different year → 15 Dec 2025
         return date.strftime("%d %b %Y")
+
+
+class WorkoutRoutineItemSerializer(serializers.ModelSerializer):
+    exercise_name = serializers.CharField(source="exercise.name", read_only=True)
+    primary_body_part = serializers.CharField(
+        source="exercise.primary_body_part",
+        read_only=True,
+    )
+    secondary_body_parts = serializers.JSONField(
+        source="exercise.secondary_body_parts",
+        read_only=True,
+    )
+
+    class Meta:
+        model = WorkoutRoutineExercise
+        fields = [
+            "id",
+            "exercise",
+            "exercise_name",
+            "primary_body_part",
+            "secondary_body_parts",
+            "order",
+            "target_sets",
+            "target_reps",
+        ]
+        read_only_fields = [
+            "id",
+            "exercise_name",
+            "primary_body_part",
+            "secondary_body_parts",
+        ]
+
+    def validate_exercise(self, value):
+        request = self.context.get("request")
+
+        if request and value.user_id != request.user.id:
+            raise serializers.ValidationError("Exercise not found.")
+
+        return value
+
+    def validate_target_sets(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Target sets must be at least 1.")
+
+        return value
+
+    def validate_target_reps(self, value):
+        if value is not None and value < 1:
+            raise serializers.ValidationError("Target reps must be at least 1.")
+
+        return value
+
+
+class WorkoutRoutineSerializer(serializers.ModelSerializer):
+    items = WorkoutRoutineItemSerializer(many=True)
+    exercise_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = WorkoutRoutine
+        fields = [
+            "id",
+            "name",
+            "description",
+            "items",
+            "exercise_count",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["user", "created_at", "updated_at"]
+
+    def validate_name(self, value):
+        name = value.strip().lower()
+
+        if not name:
+            raise serializers.ValidationError("Routine name is required.")
+
+        request = self.context.get("request")
+
+        if request and request.user.is_authenticated:
+            queryset = WorkoutRoutine.objects.filter(user=request.user, name=name)
+
+            if self.instance:
+                queryset = queryset.exclude(pk=self.instance.pk)
+
+            if queryset.exists():
+                raise serializers.ValidationError("Routine already exists.")
+
+        return name
+
+    def validate_items(self, value):
+        if not value:
+            raise serializers.ValidationError("Add at least one exercise.")
+
+        exercise_ids = []
+
+        for item in value:
+            exercise_id = item["exercise"].id
+
+            if exercise_id in exercise_ids:
+                raise serializers.ValidationError(
+                    "Each exercise can appear only once in a routine."
+                )
+
+            exercise_ids.append(exercise_id)
+
+        return value
+
+    def create(self, validated_data):
+        items = validated_data.pop("items", [])
+        routine = WorkoutRoutine.objects.create(**validated_data)
+        self.sync_items(routine, items)
+
+        return routine
+
+    def update(self, instance, validated_data):
+        items = validated_data.pop("items", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        if items is not None:
+            instance.items.all().delete()
+            self.sync_items(instance, items)
+
+        return instance
+
+    def sync_items(self, routine, items):
+        for index, item in enumerate(items):
+            WorkoutRoutineExercise.objects.create(
+                routine=routine,
+                exercise=item["exercise"],
+                order=index,
+                target_sets=item.get("target_sets", 3),
+                target_reps=item.get("target_reps"),
+            )
 
 
 class RegisterSerializer(serializers.ModelSerializer):
