@@ -16,7 +16,7 @@ from .pagination import ExercisePagination
 
 from django.db.models import Count, Sum, Max, F
 from django.db.models.functions import TruncDay, TruncMonth, TruncYear
-from datetime import timedelta
+from datetime import date, timedelta
 from django.utils import timezone
 
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -36,6 +36,36 @@ from users.tokens import email_verification_token, password_reset_token
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+STREAK_RESET_AFTER_REST_DAYS = 4
+STREAK_RESET_DELTA = timedelta(days=STREAK_RESET_AFTER_REST_DAYS)
+
+
+def calculate_workout_streaks(workout_days: list[date], today: date):
+    streak = 0
+    max_streak = 0
+
+    if not workout_days:
+        return streak, max_streak
+
+    current_streak = 0
+    previous_day = None
+
+    for day in workout_days:
+        if previous_day is None or day - previous_day <= STREAK_RESET_DELTA:
+            current_streak += 1
+        else:
+            current_streak = 1
+
+        max_streak = max(max_streak, current_streak)
+        previous_day = day
+
+    last_workout_day = workout_days[-1]
+
+    if today - last_workout_day < STREAK_RESET_DELTA:
+        streak = current_streak
+
+    return streak, max_streak
 
 
 class WorkoutRoutineViewset(viewsets.ModelViewSet):
@@ -260,35 +290,7 @@ class ExerciseSetViewset(viewsets.ModelViewSet):
             1 for day in workout_days if month_start <= day < next_month_start
         )
 
-        streak = 0
-        max_streak = 0
-
-        if workout_days:
-            current_streak = 0
-            previous_day = None
-
-            for day in workout_days:
-                if previous_day is None or day - previous_day <= timedelta(days=2):
-                    current_streak += 1
-                else:
-                    current_streak = 1
-
-                max_streak = max(max_streak, current_streak)
-                previous_day = day
-
-            last_workout_day = workout_days[-1]
-
-            if today - last_workout_day <= timedelta(days=2):
-                streak = 1
-
-                for i in range(len(workout_days) - 1, 0, -1):
-                    current_day = workout_days[i]
-                    previous_day = workout_days[i - 1]
-
-                    if current_day - previous_day <= timedelta(days=2):
-                        streak += 1
-                    else:
-                        break
+        streak, max_streak = calculate_workout_streaks(workout_days, today)
 
         data = {
             "total_workouts": total_workouts,
